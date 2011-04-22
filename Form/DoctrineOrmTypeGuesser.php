@@ -3,26 +3,21 @@
 /*
  * This file is part of the Symfony package.
  *
- * (c) Fabien Potencier <fabien@symfony.com>
+ * (c) Fabien Potencier <fabien.potencier@symfony-project.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
 
-namespace Symfony\Bridge\Doctrine\Form\Type\Guesser;
+namespace Symfony\Bridge\Doctrine\Form;
 
+use Symfony\Component\Form\FormTypeGuesserInterface;
+use Symfony\Component\Form\Guess\Guess;
+use Symfony\Component\Form\Guess\TypeGuess;
+use Symfony\Component\Form\Guess\ValueGuess;
 use Doctrine\ORM\EntityManager;
-use Symfony\Component\Form\Type\Guesser\Guess;
-use Symfony\Component\Form\Type\Guesser\TypeGuesserInterface;
-use Symfony\Component\Form\Type\Guesser\TypeGuess;
-use Symfony\Component\Form\Type\Guesser\ValueGuess;
 
-/**
- * Guesses form fields from the metadata of Doctrine 2
- *
- * @author Bernhard Schussek <bernhard.schussek@symfony.com>
- */
-class EntityTypeGuesser implements TypeGuesserInterface
+class DoctrineOrmTypeGuesser implements FormTypeGuesserInterface
 {
     /**
      * The Doctrine 2 entity manager
@@ -30,11 +25,6 @@ class EntityTypeGuesser implements TypeGuesserInterface
      */
     protected $em = null;
 
-    /**
-     * Constructor
-     *
-     * @param ClassMetadataFactoryInterface $metadataFactory
-     */
     public function __construct(EntityManager $em)
     {
         $this->em = $em;

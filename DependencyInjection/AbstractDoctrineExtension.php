@@ -42,15 +42,16 @@ abstract class AbstractDoctrineExtension extends Extension
     /**
      * @param array            $objectManager A configured object manager.
      * @param ContainerBuilder $container     A ContainerBuilder instance
+     * @param array            $mappedBundles A list of explicitly mapped Bundles
      *
      * @throws \InvalidArgumentException
      */
-    protected function loadMappingInformation(array $objectManager, ContainerBuilder $container)
+    protected function loadMappingInformation(array $objectManager, ContainerBuilder $container, array $mappedBundles = array())
     {
         if ($objectManager['auto_mapping']) {
             // automatically register bundle mappings
             foreach (array_keys($container->getParameter('kernel.bundles')) as $bundle) {
-                if (!isset($objectManager['mappings'][$bundle])) {
+                if (!isset($mappedBundles[$bundle]) && !isset($objectManager['mappings'][$bundle])) {
                     $objectManager['mappings'][$bundle] = array(
                         'mapping'   => true,
                         'is_bundle' => true,

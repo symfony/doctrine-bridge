@@ -95,7 +95,7 @@ class DoctrineOrmTypeGuesser implements FormTypeGuesserInterface
 
         // Check whether the field exists and is nullable or not
         if ($classMetadata->hasField($property)) {
-            if (!$classMetadata->isNullable($property)) {
+            if (!$classMetadata->isNullable($property) && !array_key_exists('default', $classMetadata->getFieldMapping($property)['options'])) {
                 return new ValueGuess(true, Guess::HIGH_CONFIDENCE);
             }
 

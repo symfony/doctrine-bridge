@@ -13,6 +13,7 @@ namespace Symfony\Bridge\Doctrine\Form\ChoiceList;
 
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Types\Type;
 
 /**
  * Loads entities using a {@link QueryBuilder} instance.
@@ -77,6 +78,21 @@ class ORMQueryBuilderLoader implements EntityLoaderInterface
         if (!$values) {
             return array();
         }
+        
+        /*
+         * Type::GUID can be used as entity ID and is Connection::PARAM_STR_ARRAY
+         *
+         * when submiting form with required set to FALSE and empty entity with Type::GUID as entity ID,
+         * we still recieve an SQLSTATE[22P02]: Invalid text representation: 7 ERROR:  invalid input syntax for uuid: ""
+         * in the PostgreSQL Plateform for exemple.
+         * 
+         * https://github.com/symfony/symfony/pull/14465 ???
+         */
+		if ($parameterType == Connection::PARAM_STR_ARRAY && $metadata->getTypeOfField($identifier) == Type::GUID) {
+			if (\count($values) == 1 && $values[0] == '') {
+				return array();
+			}
+		}
 
         return $qb->andWhere($where)
                   ->getQuery()

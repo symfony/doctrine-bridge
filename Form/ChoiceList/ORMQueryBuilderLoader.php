@@ -82,7 +82,7 @@ class ORMQueryBuilderLoader implements EntityLoaderInterface
         } else {
             $parameterType = Connection::PARAM_STR_ARRAY;
         }
-        if (!$values) {
+        if (!$values || count(array_filter($values)) == 0) {
             return array();
         }
 

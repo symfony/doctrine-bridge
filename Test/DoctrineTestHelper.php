@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Symfony\Bridge\Doctrine\Tests;
+namespace Symfony\Bridge\Doctrine\Test;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\EventManager;
@@ -24,29 +24,40 @@ use Doctrine\ORM\ORMSetup;
 use Doctrine\Persistence\Mapping\Driver\MappingDriverChain;
 use Doctrine\Persistence\Mapping\Driver\SymfonyFileLocator;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\VarExporter\LazyGhostTrait;
 
 /**
  * Provides utility functions needed in tests.
  *
  * @author Bernhard Schussek <bschussek@gmail.com>
+ *
+ * @deprecated since Symfony 5.3
  */
-final class DoctrineTestHelper
+class DoctrineTestHelper
 {
     /**
      * Returns an entity manager for testing.
+     *
+     * @return EntityManager
      */
-    public static function createTestEntityManager(?Configuration $config = null): EntityManager
+    public static function createTestEntityManager(?Configuration $config = null)
     {
         if (!\extension_loaded('pdo_sqlite')) {
             TestCase::markTestSkipped('Extension pdo_sqlite is required.');
+        }
+
+        if (__CLASS__ === static::class) {
+            trigger_deprecation('symfony/doctrine-bridge', '5.3', '"%s" is deprecated and will be removed in 6.0.', __CLASS__);
+        }
+
+        if (null === $config) {
+            $config = self::createTestConfiguration();
         }
 
         $params = [
             'driver' => 'pdo_sqlite',
             'memory' => true,
         ];
-
-        $config ??= self::createTestConfiguration();
 
         if (!(new \ReflectionMethod(EntityManager::class, '__construct'))->isPublic()) {
             return EntityManager::create($params, $config);
@@ -57,14 +68,21 @@ final class DoctrineTestHelper
         return new EntityManager(DriverManager::getConnection($params, $config, $eventManager), $config, $eventManager);
     }
 
-    public static function createTestConfiguration(): Configuration
+    /**
+     * @return Configuration
+     */
+    public static function createTestConfiguration()
     {
-        $config = ORMSetup::createConfiguration(true);
+        if (__CLASS__ === static::class) {
+            trigger_deprecation('symfony/doctrine-bridge', '5.3', '"%s" is deprecated and will be removed in 6.0.', __CLASS__);
+        }
+
+        $config = class_exists(ORMSetup::class) ? ORMSetup::createConfiguration(true) : new Configuration();
         $config->setEntityNamespaces(['SymfonyTestsDoctrine' => 'Symfony\Bridge\Doctrine\Tests\Fixtures']);
         $config->setAutoGenerateProxyClasses(true);
         $config->setProxyDir(sys_get_temp_dir());
         $config->setProxyNamespace('SymfonyTests\Doctrine');
-        if (class_exists(AttributeDriver::class)) {
+        if (\PHP_VERSION_ID >= 80000 && class_exists(AttributeDriver::class)) {
             $config->setMetadataDriverImpl(new AttributeDriver([__DIR__.'/../Tests/Fixtures' => 'Symfony\Bridge\Doctrine\Tests\Fixtures'], true));
         } else {
             $config->setMetadataDriverImpl(new AnnotationDriver(new AnnotationReader(), null, true));
@@ -72,16 +90,24 @@ final class DoctrineTestHelper
         if (class_exists(DefaultSchemaManagerFactory::class)) {
             $config->setSchemaManagerFactory(new DefaultSchemaManagerFactory());
         }
-        if (method_exists($config, 'setLazyGhostObjectEnabled')) {
+
+        if (\PHP_VERSION_ID >= 80100 && method_exists(Configuration::class, 'setLazyGhostObjectEnabled') && trait_exists(LazyGhostTrait::class)) {
             $config->setLazyGhostObjectEnabled(true);
         }
 
         return $config;
     }
 
-    public static function createTestConfigurationWithXmlLoader(): Configuration
+    /**
+     * @return Configuration
+     */
+    public static function createTestConfigurationWithXmlLoader()
     {
-        $config = self::createTestConfiguration();
+        if (__CLASS__ === static::class) {
+            trigger_deprecation('symfony/doctrine-bridge', '5.3', '"%s" is deprecated and will be removed in 6.0.', __CLASS__);
+        }
+
+        $config = static::createTestConfiguration();
 
         $driverChain = new MappingDriverChain();
         $driverChain->addDriver(

@@ -34,7 +34,7 @@ class DoctrineTransactionMiddleware extends AbstractDoctrineMiddleware
 
             return $envelope;
         } catch (\Throwable $exception) {
-            $entityManager->getConnection()->rollBack();
+            $this->tryRollBackTransaction($entityManager, $exception);
 
             if ($exception instanceof HandlerFailedException) {
                 // Remove all HandledStamp from the envelope so the retry will execute all handlers again.
@@ -43,6 +43,15 @@ class DoctrineTransactionMiddleware extends AbstractDoctrineMiddleware
             }
 
             throw $exception;
+        }
+    }
+
+    private function tryRollBackTransaction(EntityManagerInterface $entityManager, \Throwable|\Exception $exception): void
+    {
+        try {
+            $entityManager->getConnection()->rollBack();
+        } catch (\Throwable $doctrineException) {
+            throw new HandlerFailedException($doctrineException->getMessage(), previous: $exception);
         }
     }
 }

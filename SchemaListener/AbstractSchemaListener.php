@@ -23,7 +23,7 @@ abstract class AbstractSchemaListener
     {
         return static function (\Closure $exec) use ($connection): bool {
             $checkTable = 'schema_subscriber_check_'.bin2hex(random_bytes(7));
-            $connection->executeStatement(sprintf('CREATE TABLE %s (id INTEGER NOT NULL)', $checkTable));
+            $connection->executeStatement(sprintf('CREATE TABLE %s (id INTEGER PRIMARY KEY NOT NULL)', $checkTable));
 
             try {
                 $exec(sprintf('DROP TABLE %s', $checkTable));

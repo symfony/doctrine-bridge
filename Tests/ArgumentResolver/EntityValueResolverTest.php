@@ -16,6 +16,8 @@ use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Persistence\ObjectRepository;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bridge\Doctrine\ArgumentResolver\EntityValueResolver;
@@ -64,9 +66,8 @@ class EntityValueResolverTest extends TestCase
         $this->assertSame([], $resolver->resolve($request, $argument));
     }
 
-    /**
-     * @group legacy
-     */
+    #[IgnoreDeprecations]
+    #[Group('legacy')]
     public function testResolveWithNoIdAndDataOptional()
     {
         $manager = $this->createMock(ObjectManager::class);
@@ -251,9 +252,8 @@ class EntityValueResolverTest extends TestCase
         yield ['foo'];
     }
 
-    /**
-     * @group legacy
-     */
+    #[IgnoreDeprecations]
+    #[Group('legacy')]
     public function testResolveGuessOptional()
     {
         $manager = $this->createMock(ObjectManager::class);

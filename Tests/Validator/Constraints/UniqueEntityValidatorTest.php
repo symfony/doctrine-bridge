@@ -17,6 +17,8 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Tools\SchemaTool;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\ObjectManager;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Bridge\Doctrine\Tests\DoctrineTestHelper;
 use Symfony\Bridge\Doctrine\Tests\Fixtures\AssociatedEntityDto;
@@ -185,9 +187,8 @@ class UniqueEntityValidatorTest extends ConstraintValidatorTestCase
         $this->assertNoViolation();
     }
 
-    /**
-     * @group legacy
-     */
+    #[IgnoreDeprecations]
+    #[Group('legacy')]
     public function testValidateEntityWithPrivatePropertyAndProxyObjectDoctrineStyle()
     {
         $entity = new SingleIntIdWithPrivateNameEntity(1, 'Foo');
@@ -226,9 +227,8 @@ class UniqueEntityValidatorTest extends ConstraintValidatorTestCase
             ->assertRaised();
     }
 
-    /**
-     * @group legacy
-     */
+    #[IgnoreDeprecations]
+    #[Group('legacy')]
     public function testValidateCustomErrorPathDoctrineStyle()
     {
         $entity1 = new SingleIntIdEntity(1, 'Foo');
@@ -954,9 +954,8 @@ class UniqueEntityValidatorTest extends ConstraintValidatorTestCase
             ->assertRaised();
     }
 
-    /**
-     * @group legacy
-     */
+    #[IgnoreDeprecations]
+    #[Group('legacy')]
     public function testValidateDTOUniquenessDoctrineStyle()
     {
         $constraint = new UniqueEntity([
@@ -1017,9 +1016,8 @@ class UniqueEntityValidatorTest extends ConstraintValidatorTestCase
             ->assertRaised();
     }
 
-    /**
-     * @group legacy
-     */
+    #[IgnoreDeprecations]
+    #[Group('legacy')]
     public function testValidateMappingOfFieldNamesDoctrineStyle()
     {
         $constraint = new UniqueEntity([
@@ -1061,9 +1059,8 @@ class UniqueEntityValidatorTest extends ConstraintValidatorTestCase
         $this->validator->validate($dto, $constraint);
     }
 
-    /**
-     * @group legacy
-     */
+    #[IgnoreDeprecations]
+    #[Group('legacy')]
     public function testInvalidateDTOFieldNameDoctrineStyle()
     {
         $this->expectException(ConstraintDefinitionException::class);
@@ -1094,9 +1091,8 @@ class UniqueEntityValidatorTest extends ConstraintValidatorTestCase
         $this->validator->validate($dto, $constraint);
     }
 
-    /**
-     * @group legacy
-     */
+    #[IgnoreDeprecations]
+    #[Group('legacy')]
     public function testInvalidateEntityFieldNameDoctrineStyle()
     {
         $this->expectException(ConstraintDefinitionException::class);
@@ -1142,9 +1138,8 @@ class UniqueEntityValidatorTest extends ConstraintValidatorTestCase
             ->assertRaised();
     }
 
-    /**
-     * @group legacy
-     */
+    #[IgnoreDeprecations]
+    #[Group('legacy')]
     public function testValidateDTOUniquenessWhenUpdatingEntityDoctrineStyle()
     {
         $constraint = new UniqueEntity([
@@ -1197,9 +1192,8 @@ class UniqueEntityValidatorTest extends ConstraintValidatorTestCase
         $this->assertNoViolation();
     }
 
-    /**
-     * @group legacy
-     */
+    #[IgnoreDeprecations]
+    #[Group('legacy')]
     public function testValidateDTOUniquenessWhenUpdatingEntityWithTheSameValueDoctrineStyle()
     {
         $constraint = new UniqueEntity([
@@ -1251,9 +1245,8 @@ class UniqueEntityValidatorTest extends ConstraintValidatorTestCase
         $this->assertNoViolation();
     }
 
-    /**
-     * @group legacy
-     */
+    #[IgnoreDeprecations]
+    #[Group('legacy')]
     public function testValidateIdentifierMappingOfFieldNamesDoctrineStyle()
     {
         $constraint = new UniqueEntity([
@@ -1311,9 +1304,8 @@ class UniqueEntityValidatorTest extends ConstraintValidatorTestCase
         $this->validator->validate($dto, $constraint);
     }
 
-    /**
-     * @group legacy
-     */
+    #[IgnoreDeprecations]
+    #[Group('legacy')]
     public function testInvalidateMissingIdentifierFieldNameDoctrineStyle()
     {
         $this->expectException(ConstraintDefinitionException::class);
@@ -1361,9 +1353,8 @@ class UniqueEntityValidatorTest extends ConstraintValidatorTestCase
         $this->validator->validate($dto, $constraint);
     }
 
-    /**
-     * @group legacy
-     */
+    #[IgnoreDeprecations]
+    #[Group('legacy')]
     public function testUninitializedValueThrowExceptionDoctrineStyle()
     {
         $this->expectExceptionMessage('Typed property Symfony\Bridge\Doctrine\Tests\Fixtures\Dto::$foo must not be accessed before initialization');
@@ -1404,9 +1395,8 @@ class UniqueEntityValidatorTest extends ConstraintValidatorTestCase
         $this->validator->validate($dto, $constraint);
     }
 
-    /**
-     * @group legacy
-     */
+    #[IgnoreDeprecations]
+    #[Group('legacy')]
     public function testEntityManagerNullObjectWhenDTODoctrineStyle()
     {
         $this->expectException(ConstraintDefinitionException::class);

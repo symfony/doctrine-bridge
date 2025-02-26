@@ -5,6 +5,7 @@ CHANGELOG
 ---
 
  * Reset the manager registry using native lazy objects when applicable
+ * Deprecate the `DoctrineExtractor::getTypes()` method, use `DoctrineExtractor::getType()` instead
 
 7.2
 ---

@@ -11,6 +11,7 @@
 
 namespace Symfony\Bridge\Doctrine\Validator\Constraints;
 
+use Doctrine\ORM\Mapping\ClassMetadata as OrmClassMetadata;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use Doctrine\Persistence\ObjectManager;
@@ -92,7 +93,11 @@ class UniqueEntityValidator extends ConstraintValidator
                 throw new ConstraintDefinitionException(sprintf('The field "%s" is not mapped by Doctrine, so it cannot be validated for uniqueness.', $fieldName));
             }
 
-            $fieldValue = $class->reflFields[$fieldName]->getValue($entity);
+            if (property_exists(OrmClassMetadata::class, 'propertyAccessors')) {
+                $fieldValue = $class->propertyAccessors[$fieldName]->getValue($entity);
+            } else {
+                $fieldValue = $class->reflFields[$fieldName]->getValue($entity);
+            }
 
             if (null === $fieldValue && $this->ignoreNullForField($constraint, $fieldName)) {
                 $hasIgnorableNullValue = true;

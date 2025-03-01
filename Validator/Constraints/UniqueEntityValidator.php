@@ -11,6 +11,7 @@
 
 namespace Symfony\Bridge\Doctrine\Validator\Constraints;
 
+use Doctrine\ORM\Mapping\ClassMetadata as OrmClassMetadata;
 use Doctrine\ORM\Mapping\MappingException as ORMMappingException;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\Mapping\ClassMetadata;
@@ -287,9 +288,13 @@ class UniqueEntityValidator extends ConstraintValidator
                 throw new ConstraintDefinitionException(\sprintf('The field "%s" is not a property of class "%s".', $fieldName, $objectClass));
             }
 
-            $fieldValues[$entityFieldName] = $isValueEntity && $object instanceof ($class->getName())
-                ? $class->reflFields[$fieldName]->getValue($object)
-                : $this->getPropertyValue($objectClass, $fieldName, $object);
+            if ($isValueEntity && $object instanceof ($class->getName()) && property_exists(OrmClassMetadata::class, 'propertyAccessors')) {
+                $fieldValues[$entityFieldName] = $class->propertyAccessors[$fieldName]->getValue($object);
+            } elseif ($isValueEntity && $object instanceof ($class->getName())) {
+                $fieldValues[$entityFieldName] = $class->reflFields[$fieldName]->getValue($object);
+            } else {
+                $fieldValues[$entityFieldName] = $this->getPropertyValue($objectClass, $fieldName, $object);
+            }
         }
 
         return $fieldValues;

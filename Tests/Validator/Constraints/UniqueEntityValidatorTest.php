@@ -16,6 +16,7 @@ use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use Doctrine\ORM\Mapping\PropertyAccessors\RawValuePropertyAccessor;
 use Doctrine\ORM\Tools\SchemaTool;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\ObjectManager;
@@ -133,10 +134,20 @@ class UniqueEntityValidatorTest extends ConstraintValidatorTestCase
         ;
         $refl = $this->createMock(\ReflectionProperty::class);
         $refl
+            ->method('getName')
+            ->willReturn('name')
+        ;
+        $refl
             ->method('getValue')
             ->willReturn(true)
         ;
-        $classMetadata->reflFields = ['name' => $refl];
+
+        if (property_exists(ClassMetadata::class, 'propertyAccessors')) {
+            $classMetadata->propertyAccessors['name'] = RawValuePropertyAccessor::fromReflectionProperty($refl);
+        } else {
+            $classMetadata->reflFields = ['name' => $refl];
+        }
+
         $em->expects($this->any())
             ->method('getClassMetadata')
             ->willReturn($classMetadata)

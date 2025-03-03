@@ -6,6 +6,7 @@ CHANGELOG
 
  * Reset the manager registry using native lazy objects when applicable
  * Deprecate the `DoctrineExtractor::getTypes()` method, use `DoctrineExtractor::getType()` instead
+ * Add support for `Symfony\Component\Clock\DatePoint` as `DatePointType` Doctrine type
 
 7.2
 ---

@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+7.3
+---
+
+ * Reset the manager registry using native lazy objects when applicable
+
 7.2
 ---
 

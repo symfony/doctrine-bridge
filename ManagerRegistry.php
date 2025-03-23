@@ -59,7 +59,8 @@ abstract class ManagerRegistry extends AbstractManagerRegistry
                     $name = $this->aliases[$name] ?? $name;
                     $wrappedInstance = match (true) {
                         isset($this->fileMap[$name]) => $this->load($this->fileMap[$name], false),
-                        (new \ReflectionMethod($this, $method = $this->methodMap[$name]))->isStatic() => $this->{$method}($this, false),
+                        !$method = $this->methodMap[$name] ?? null => throw new \LogicException(\sprintf('The "%s" service is synthetic and cannot be reset.', $name)),
+                        (new \ReflectionMethod($this, $method))->isStatic() => $this->{$method}($this, false),
                         default => $this->{$method}(false),
                     };
                     $manager->setProxyInitializer(null);
@@ -86,7 +87,8 @@ abstract class ManagerRegistry extends AbstractManagerRegistry
 
                     return match (true) {
                         isset($this->fileMap[$name]) => $this->load($this->fileMap[$name], false),
-                        (new \ReflectionMethod($this, $method = $this->methodMap[$name]))->isStatic() => $this->{$method}($this, false),
+                        !$method = $this->methodMap[$name] ?? null => throw new \LogicException(\sprintf('The "%s" service is synthetic and cannot be reset.', $name)),
+                        (new \ReflectionMethod($this, $method))->isStatic() => $this->{$method}($this, false),
                         default => $this->{$method}(false),
                     };
                 },

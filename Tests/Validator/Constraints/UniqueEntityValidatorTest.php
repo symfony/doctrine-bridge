@@ -164,9 +164,6 @@ class UniqueEntityValidatorTest extends ConstraintValidatorTestCase
         yield 'Named arguments' => [new UniqueEntity(message: 'myMessage', fields: ['name'], em: 'foo')];
     }
 
-    /**
-     * @group legacy
-     */
     public function testValidateEntityWithPrivatePropertyAndProxyObject()
     {
         $entity = new SingleIntIdWithPrivateNameEntity(1, 'Foo');

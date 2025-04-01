@@ -21,6 +21,7 @@ use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Controller\ValueResolverInterface;
 use Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadata;
+use Symfony\Component\HttpKernel\Exception\NearMissValueResolverException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -68,7 +69,11 @@ final class EntityValueResolver implements ValueResolverInterface
         } elseif (false === $object = $this->find($manager, $request, $options, $argument)) {
             // find by criteria
             if (!$criteria = $this->getCriteria($request, $options, $manager, $argument)) {
-                return [];
+                if (!class_exists(NearMissValueResolverException::class)) {
+                    return [];
+                }
+
+                throw new NearMissValueResolverException(sprintf('Cannot find mapping for "%s": declare one using either the #[MapEntity] attribute or mapped route parameters.', $options->class));
             }
             try {
                 $object = $manager->getRepository($options->class)->findOneBy($criteria);
@@ -185,7 +190,7 @@ final class EntityValueResolver implements ValueResolverInterface
 
             return $criteria;
         } elseif (null === $mapping) {
-            trigger_deprecation('symfony/doctrine-bridge', '7.1', 'Relying on auto-mapping for Doctrine entities is deprecated for argument $%s of "%s": declare the identifier using either the #[MapEntity] attribute or mapped route parameters.', $argument->getName(), method_exists($argument, 'getControllerName') ? $argument->getControllerName() : 'n/a');
+            trigger_deprecation('symfony/doctrine-bridge', '7.1', 'Relying on auto-mapping for Doctrine entities is deprecated for argument $%s of "%s": declare the mapping using either the #[MapEntity] attribute or mapped route parameters.', $argument->getName(), method_exists($argument, 'getControllerName') ? $argument->getControllerName() : 'n/a');
             $mapping = $request->attributes->keys();
         }
 

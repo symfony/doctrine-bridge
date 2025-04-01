@@ -7,6 +7,7 @@ CHANGELOG
  * Reset the manager registry using native lazy objects when applicable
  * Deprecate the `DoctrineExtractor::getTypes()` method, use `DoctrineExtractor::getType()` instead
  * Add support for `Symfony\Component\Clock\DatePoint` as `DatePointType` Doctrine type
+ * Improve exception message when `EntityValueResolver` gets no mapping information
 
 7.2
 ---

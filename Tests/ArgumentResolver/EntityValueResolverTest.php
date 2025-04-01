@@ -24,6 +24,7 @@ use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 use Symfony\Component\ExpressionLanguage\SyntaxError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\ControllerMetadata\ArgumentMetadata;
+use Symfony\Component\HttpKernel\Exception\NearMissValueResolverException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class EntityValueResolverTest extends TestCase
@@ -75,6 +76,11 @@ class EntityValueResolverTest extends TestCase
         $request = new Request();
         $argument = $this->createArgument(null, new MapEntity(), 'arg', true);
 
+        if (class_exists(NearMissValueResolverException::class)) {
+            $this->expectException(NearMissValueResolverException::class);
+            $this->expectExceptionMessage('Cannot find mapping for "stdClass": declare one using either the #[MapEntity] attribute or mapped route parameters.');
+        }
+
         $this->assertSame([], $resolver->resolve($request, $argument));
     }
 
@@ -93,6 +99,11 @@ class EntityValueResolverTest extends TestCase
 
         $manager->expects($this->never())
             ->method('getRepository');
+
+        if (class_exists(NearMissValueResolverException::class)) {
+            $this->expectException(NearMissValueResolverException::class);
+            $this->expectExceptionMessage('Cannot find mapping for "stdClass": declare one using either the #[MapEntity] attribute or mapped route parameters.');
+        }
 
         $this->assertSame([], $resolver->resolve($request, $argument));
     }
@@ -261,6 +272,11 @@ class EntityValueResolverTest extends TestCase
             ->willReturn($metadata);
 
         $manager->expects($this->never())->method('getRepository');
+
+        if (class_exists(NearMissValueResolverException::class)) {
+            $this->expectException(NearMissValueResolverException::class);
+            $this->expectExceptionMessage('Cannot find mapping for "stdClass": declare one using either the #[MapEntity] attribute or mapped route parameters.');
+        }
 
         $this->assertSame([], $resolver->resolve($request, $argument));
     }

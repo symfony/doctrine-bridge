@@ -494,7 +494,6 @@ class EntityValueResolverTest extends TestCase
             $registry->method('getManager')->willReturn($manager);
         }
 
-
         return $registry;
     }
 }

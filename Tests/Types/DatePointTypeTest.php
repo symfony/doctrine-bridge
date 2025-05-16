@@ -76,6 +76,14 @@ final class DatePointTypeTest extends TestCase
         $this->assertSame($expected->format($format), $actual->format($format));
     }
 
+    public function testDatabaseValueConvertsToPHPValue()
+    {
+        $actual = $this->type->convertToPHPValue('2025-03-03 12:13:14', new PostgreSQLPlatform());
+
+        $this->assertInstanceOf(DatePoint::class, $actual);
+        $this->assertSame('2025-03-03 12:13:14', $actual->format('Y-m-d H:i:s'));
+    }
+
     public function testGetName()
     {
         $this->assertSame('date_point', $this->type->getName());

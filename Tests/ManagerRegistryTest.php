@@ -22,7 +22,7 @@ use Symfony\Component\VarExporter\LazyObjectInterface;
 
 class ManagerRegistryTest extends TestCase
 {
-    public static function setUpBeforeClass(): void
+    public function testResetService()
     {
         $container = new ContainerBuilder();
 
@@ -32,10 +32,7 @@ class ManagerRegistryTest extends TestCase
 
         $dumper = new PhpDumper($container);
         eval('?>'.$dumper->dump(['class' => 'LazyServiceDoctrineBridgeContainer']));
-    }
 
-    public function testResetService()
-    {
         $container = new \LazyServiceDoctrineBridgeContainer();
 
         $registry = new TestManagerRegistry('name', [], ['defaultManager' => 'foo'], 'defaultConnection', 'defaultManager', 'proxyInterfaceName');
@@ -50,6 +47,63 @@ class ManagerRegistryTest extends TestCase
         $this->assertSame($foo, $container->get('foo'));
         $this->assertInstanceOf(ObjectManager::class, $foo);
         $this->assertFalse(isset($foo->bar));
+    }
+
+    /**
+     * @requires PHP 8.4
+     *
+     * @dataProvider provideResetServiceWithNativeLazyObjectsCases
+     */
+    public function testResetServiceWithNativeLazyObjects(string $class)
+    {
+        $container = new $class();
+
+        $registry = new TestManagerRegistry(
+            'irrelevant',
+            [],
+            ['defaultManager' => 'foo'],
+            'irrelevant',
+            'defaultManager',
+            'irrelevant',
+        );
+        $registry->setTestContainer($container);
+
+        $foo = $container->get('foo');
+        self::assertSame(DummyManager::class, $foo::class);
+
+        $foo->bar = 123;
+        self::assertTrue(isset($foo->bar));
+
+        $registry->resetManager();
+
+        self::assertSame($foo, $container->get('foo'));
+        self::assertSame(DummyManager::class, $foo::class);
+        self::assertFalse(isset($foo->bar));
+    }
+
+    public static function provideResetServiceWithNativeLazyObjectsCases(): iterable
+    {
+        $container = new ContainerBuilder();
+
+        $container->register('foo', DummyManager::class)->setPublic(true);
+        $container->getDefinition('foo')->setLazy(true);
+        $container->compile();
+
+        $dumper = new PhpDumper($container);
+
+        eval('?>'.$dumper->dump(['class' => 'NativeLazyServiceDoctrineBridgeContainer']));
+
+        yield ['NativeLazyServiceDoctrineBridgeContainer'];
+
+        $dumps = $dumper->dump(['class' => 'NativeLazyServiceDoctrineBridgeContainerAsFiles', 'as_files' => true]);
+
+        $lastDump = array_pop($dumps);
+        foreach (array_reverse($dumps) as $dump) {
+            eval('?>'.$dump);
+        }
+        eval('?>'.$lastDump);
+
+        yield ['NativeLazyServiceDoctrineBridgeContainerAsFiles'];
     }
 
     /**

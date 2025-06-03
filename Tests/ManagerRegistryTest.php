@@ -50,8 +50,6 @@ class ManagerRegistryTest extends TestCase
     }
 
     /**
-     * @requires PHP 8.4
-     *
      * @dataProvider provideResetServiceWithNativeLazyObjectsCases
      */
     public function testResetServiceWithNativeLazyObjects(string $class)

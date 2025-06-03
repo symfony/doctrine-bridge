@@ -220,7 +220,7 @@ class EntityUserProviderTest extends TestCase
         $provider = new EntityUserProvider($this->getManager($em), User::class);
         $refreshedUser = $provider->refreshUser($user);
 
-        if (\PHP_VERSION_ID >= 80400 && method_exists(Configuration::class, 'enableNativeLazyObjects')) {
+        if (method_exists(Configuration::class, 'enableNativeLazyObjects')) {
             $this->assertFalse((new \ReflectionClass(User::class))->isUninitializedLazyObject($refreshedUser));
             $this->assertSame('user1', $refreshedUser->name);
         } else {

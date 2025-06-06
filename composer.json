@@ -40,7 +40,7 @@
         "symfony/lock": "^7.4|^8.0",
         "symfony/messenger": "^7.4|^8.0",
         "symfony/property-access": "^7.4|^8.0",
-        "symfony/property-info": "^7.4|^8.0",
+        "symfony/property-info": "^8.0",
         "symfony/security-core": "^7.4|^8.0",
         "symfony/stopwatch": "^7.4|^8.0",
         "symfony/translation": "^7.4|^8.0",
@@ -53,7 +53,8 @@
         "doctrine/collections": "<1.8",
         "doctrine/dbal": "<3.6",
         "doctrine/lexer": "<1.1",
-        "doctrine/orm": "<2.15"
+        "doctrine/orm": "<2.15",
+        "symfony/property-info": "<8.0"
     },
     "autoload": {
         "psr-4": { "Symfony\\Bridge\\Doctrine\\": "" },

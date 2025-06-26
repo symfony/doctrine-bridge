@@ -45,7 +45,11 @@ class DoctrineExtractorTest extends TestCase
             $config->setSchemaManagerFactory(new DefaultSchemaManagerFactory());
         }
         if (!class_exists(\Doctrine\Persistence\Mapping\Driver\AnnotationDriver::class)) { // doctrine/persistence >= 3.0
-            $config->setLazyGhostObjectEnabled(true);
+            if (\PHP_VERSION_ID >= 80400 && method_exists($config, 'enableNativeLazyObjects')) {
+                $config->enableNativeLazyObjects(true);
+            } else {
+                $config->setLazyGhostObjectEnabled(true);
+            }
         }
 
         $eventManager = new EventManager();

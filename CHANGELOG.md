@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+8.0
+---
+
+ * Make `ProxyCacheWarmer` class `final`
+
 7.3
 ---
 

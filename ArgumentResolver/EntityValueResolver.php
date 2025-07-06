@@ -73,7 +73,7 @@ final class EntityValueResolver implements ValueResolverInterface
                     return [];
                 }
 
-                throw new NearMissValueResolverException(sprintf('Cannot find mapping for "%s": declare one using either the #[MapEntity] attribute or mapped route parameters.', $options->class));
+                throw new NearMissValueResolverException(\sprintf('Cannot find mapping for "%s": declare one using either the #[MapEntity] attribute or mapped route parameters.', $options->class));
             }
             try {
                 $object = $manager->getRepository($options->class)->findOneBy($criteria);

@@ -66,18 +66,21 @@ class UniqueEntity extends Constraint
             trigger_deprecation('symfony/validator', '7.3', 'Passing an array of options to configure the "%s" constraint is deprecated, use named arguments instead.', static::class);
 
             $options = array_merge($fields, $options ?? []);
+            $fields = null;
         } else {
             if (\is_array($options)) {
                 trigger_deprecation('symfony/validator', '7.3', 'Passing an array of options to configure the "%s" constraint is deprecated, use named arguments instead.', static::class);
-            } else {
-                $options = [];
-            }
 
-            $options['fields'] = $fields;
+                $options['fields'] = $fields;
+                $fields = null;
+            } else {
+                $options = null;
+            }
         }
 
         parent::__construct($options, $groups, $payload);
 
+        $this->fields = $fields ?? $this->fields;
         $this->message = $message ?? $this->message;
         $this->service = $service ?? $this->service;
         $this->em = $em ?? $this->em;

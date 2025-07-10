@@ -57,7 +57,7 @@ final class EntityValueResolver implements ValueResolverInterface
         $message = '';
         if (null !== $options->expr) {
             if (null === $object = $this->findViaExpression($manager, $request, $options)) {
-                $message = sprintf(' The expression "%s" returned null.', $options->expr);
+                $message = \sprintf(' The expression "%s" returned null.', $options->expr);
             }
         // find by identifier?
         } elseif (false === $object = $this->find($manager, $request, $options, $argument->getName())) {
@@ -73,7 +73,7 @@ final class EntityValueResolver implements ValueResolverInterface
         }
 
         if (null === $object && !$argument->isNullable()) {
-            throw new NotFoundHttpException(sprintf('"%s" object not found by "%s".', $options->class, self::class).$message);
+            throw new NotFoundHttpException(\sprintf('"%s" object not found by "%s".', $options->class, self::class).$message);
         }
 
         return [$object];
@@ -129,7 +129,7 @@ final class EntityValueResolver implements ValueResolverInterface
             foreach ($options->id as $field) {
                 // Convert "%s_uuid" to "foobar_uuid"
                 if (str_contains($field, '%s')) {
-                    $field = sprintf($field, $name);
+                    $field = \sprintf($field, $name);
                 }
 
                 $id[$field] = $request->attributes->get($field);
@@ -198,7 +198,7 @@ final class EntityValueResolver implements ValueResolverInterface
     private function findViaExpression(ObjectManager $manager, Request $request, MapEntity $options): ?object
     {
         if (!$this->expressionLanguage) {
-            throw new \LogicException(sprintf('You cannot use the "%s" if the ExpressionLanguage component is not available. Try running "composer require symfony/expression-language".', __CLASS__));
+            throw new \LogicException(\sprintf('You cannot use the "%s" if the ExpressionLanguage component is not available. Try running "composer require symfony/expression-language".', __CLASS__));
         }
 
         $repository = $manager->getRepository($options->class);

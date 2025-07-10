@@ -72,13 +72,13 @@ class UniqueEntityValidator extends ConstraintValidator
             try {
                 $em = $this->registry->getManager($constraint->em);
             } catch (\InvalidArgumentException $e) {
-                throw new ConstraintDefinitionException(sprintf('Object manager "%s" does not exist.', $constraint->em), 0, $e);
+                throw new ConstraintDefinitionException(\sprintf('Object manager "%s" does not exist.', $constraint->em), 0, $e);
             }
         } else {
             $em = $this->registry->getManagerForClass($entity::class);
 
             if (!$em) {
-                throw new ConstraintDefinitionException(sprintf('Unable to find the object manager associated with an entity of class "%s".', get_debug_type($entity)));
+                throw new ConstraintDefinitionException(\sprintf('Unable to find the object manager associated with an entity of class "%s".', get_debug_type($entity)));
             }
         }
 
@@ -89,7 +89,7 @@ class UniqueEntityValidator extends ConstraintValidator
 
         foreach ($fields as $fieldName) {
             if (!$class->hasField($fieldName) && !$class->hasAssociation($fieldName)) {
-                throw new ConstraintDefinitionException(sprintf('The field "%s" is not mapped by Doctrine, so it cannot be validated for uniqueness.', $fieldName));
+                throw new ConstraintDefinitionException(\sprintf('The field "%s" is not mapped by Doctrine, so it cannot be validated for uniqueness.', $fieldName));
             }
 
             if (property_exists($class, 'propertyAccessors')) {
@@ -135,7 +135,7 @@ class UniqueEntityValidator extends ConstraintValidator
             $supportedClass = $repository->getClassName();
 
             if (!$entity instanceof $supportedClass) {
-                throw new ConstraintDefinitionException(sprintf('The "%s" entity repository does not support the "%s" entity. The entity should be an instance of or extend "%s".', $constraint->entityClass, $class->getName(), $supportedClass));
+                throw new ConstraintDefinitionException(\sprintf('The "%s" entity repository does not support the "%s" entity. The entity should be an instance of or extend "%s".', $constraint->entityClass, $class->getName(), $supportedClass));
             }
         } else {
             $repository = $em->getRepository($entity::class);
@@ -228,19 +228,19 @@ class UniqueEntityValidator extends ConstraintValidator
         }
 
         if (!$identifiers) {
-            return sprintf('object("%s")', $idClass);
+            return \sprintf('object("%s")', $idClass);
         }
 
         array_walk($identifiers, function (&$id, $field) {
             if (!\is_object($id) || $id instanceof \DateTimeInterface) {
                 $idAsString = $this->formatValue($id, self::PRETTY_DATE);
             } else {
-                $idAsString = sprintf('object("%s")', $id::class);
+                $idAsString = \sprintf('object("%s")', $id::class);
             }
 
-            $id = sprintf('%s => %s', $field, $idAsString);
+            $id = \sprintf('%s => %s', $field, $idAsString);
         });
 
-        return sprintf('object("%s") identified by (%s)', $idClass, implode(', ', $identifiers));
+        return \sprintf('object("%s") identified by (%s)', $idClass, implode(', ', $identifiers));
     }
 }

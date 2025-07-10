@@ -59,7 +59,7 @@ class UniqueEntity extends Constraint
         bool|string|array|null $ignoreNull = null,
         ?array $groups = null,
         $payload = null,
-        array $options = []
+        array $options = [],
     ) {
         if (\is_array($fields) && \is_string(key($fields))) {
             $options = array_merge($fields, $options);

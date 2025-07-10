@@ -101,11 +101,11 @@ class DbalLoggerTest extends TestCase
             ->expects($this->once())
             ->method('log')
             ->with('SQL', [
-                    'utf8' => 'foo',
-                    [
-                        'nonutf8' => DbalLogger::BINARY_DATA_VALUE,
-                    ],
-                ]
+                'utf8' => 'foo',
+                [
+                    'nonutf8' => DbalLogger::BINARY_DATA_VALUE,
+                ],
+            ]
             )
         ;
 
@@ -174,8 +174,8 @@ class DbalLoggerTest extends TestCase
         ;
 
         $dbalLogger->startQuery('SQL', [
-                'short' => $shortString,
-                'long' => $longString,
-            ]);
+            'short' => $shortString,
+            'long' => $longString,
+        ]);
     }
 }

@@ -62,6 +62,7 @@ class DoctrineTokenProvider implements TokenProviderInterface, TokenVerifierInte
 
         if ($row) {
             [$class, $username, $value, $last_used] = $row;
+
             return new PersistentToken($class, $username, $series, $value, new \DateTimeImmutable($last_used));
         }
 

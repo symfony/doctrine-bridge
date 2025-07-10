@@ -74,8 +74,7 @@ class CollectionToArrayTransformerTest extends TestCase
             3 => 'bar',
         ];
 
-        $collection = new class($array) implements ReadableCollection
-        {
+        $collection = new class($array) implements ReadableCollection {
             public function __construct(private readonly array $array)
             {
             }
@@ -172,7 +171,7 @@ class CollectionToArrayTransformerTest extends TestCase
 
             public function count(): int
             {
-                return count($this->array);
+                return \count($this->array);
             }
         };
 

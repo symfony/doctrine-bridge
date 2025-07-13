@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+7.4
+---
+
+ * Deprecate `UniqueEntity::getRequiredOptions()` and `UniqueEntity::getDefaultOption()`
+
 7.3
 ---
 

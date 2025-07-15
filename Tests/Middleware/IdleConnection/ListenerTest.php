@@ -9,13 +9,14 @@
  * file that was distributed with this source code.
  */
 
-namespace Middleware\IdleConnection;
+namespace Symfony\Bridge\Doctrine\Tests\Middleware\IdleConnection;
 
 use Doctrine\DBAL\Connection as ConnectionInterface;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bridge\Doctrine\Middleware\IdleConnection\Listener;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 class ListenerTest extends TestCase
 {
@@ -34,10 +35,24 @@ class ListenerTest extends TestCase
             ->willReturn($connectionOneMock);
 
         $listener = new Listener($connectionExpiries, $containerMock);
+        $event = $this->createMock(RequestEvent::class);
+        $event->method('getRequestType')->willReturn(HttpKernelInterface::MAIN_REQUEST);
 
-        $listener->onKernelRequest($this->createMock(RequestEvent::class));
+        $listener->onKernelRequest($event);
 
         $this->assertArrayNotHasKey('connectionone', (array) $connectionExpiries);
         $this->assertArrayHasKey('connectiontwo', (array) $connectionExpiries);
+    }
+
+    public function testOnKernelRequestShouldSkipSubrequests()
+    {
+        self::expectNotToPerformAssertions();
+        $arrayObj = $this->createMock(\ArrayObject::class);
+        $arrayObj->method('getIterator')->willThrowException(new \Exception('Invalid behavior'));
+        $listener = new Listener($arrayObj, $this->createMock(ContainerInterface::class));
+
+        $event = $this->createMock(RequestEvent::class);
+        $event->method('getRequestType')->willReturn(HttpKernelInterface::SUB_REQUEST);
+        $listener->onKernelRequest($event);
     }
 }

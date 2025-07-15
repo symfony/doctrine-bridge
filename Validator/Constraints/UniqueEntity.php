@@ -91,8 +91,15 @@ class UniqueEntity extends Constraint
         $this->identifierFieldNames = $identifierFieldNames ?? $this->identifierFieldNames;
     }
 
+    /**
+     * @deprecated since Symfony 7.4
+     */
     public function getRequiredOptions(): array
     {
+        if (0 === \func_num_args() || func_get_arg(0)) {
+            trigger_deprecation('symfony/doctrine-bridge', '7.4', 'The %s() method is deprecated.', __METHOD__);
+        }
+
         return ['fields'];
     }
 
@@ -109,8 +116,15 @@ class UniqueEntity extends Constraint
         return self::CLASS_CONSTRAINT;
     }
 
+    /**
+     * @deprecated since Symfony 7.4
+     */
     public function getDefaultOption(): ?string
     {
+        if (0 === \func_num_args() || func_get_arg(0)) {
+            trigger_deprecation('symfony/doctrine-bridge', '7.4', 'The %s() method is deprecated.', __METHOD__);
+        }
+
         return 'fields';
     }
 }

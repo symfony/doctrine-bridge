@@ -76,10 +76,8 @@ class EntityValueResolverTest extends TestCase
         $request = new Request();
         $argument = $this->createArgument(null, new MapEntity(), 'arg', true);
 
-        if (class_exists(NearMissValueResolverException::class)) {
-            $this->expectException(NearMissValueResolverException::class);
-            $this->expectExceptionMessage('Cannot find mapping for "stdClass": declare one using either the #[MapEntity] attribute or mapped route parameters.');
-        }
+        $this->expectException(NearMissValueResolverException::class);
+        $this->expectExceptionMessage('Cannot find mapping for "stdClass": declare one using either the #[MapEntity] attribute or mapped route parameters.');
 
         $this->assertSame([], $resolver->resolve($request, $argument));
     }
@@ -100,10 +98,8 @@ class EntityValueResolverTest extends TestCase
         $manager->expects($this->never())
             ->method('getRepository');
 
-        if (class_exists(NearMissValueResolverException::class)) {
-            $this->expectException(NearMissValueResolverException::class);
-            $this->expectExceptionMessage('Cannot find mapping for "stdClass": declare one using either the #[MapEntity] attribute or mapped route parameters.');
-        }
+        $this->expectException(NearMissValueResolverException::class);
+        $this->expectExceptionMessage('Cannot find mapping for "stdClass": declare one using either the #[MapEntity] attribute or mapped route parameters.');
 
         $this->assertSame([], $resolver->resolve($request, $argument));
     }
@@ -273,10 +269,8 @@ class EntityValueResolverTest extends TestCase
 
         $manager->expects($this->never())->method('getRepository');
 
-        if (class_exists(NearMissValueResolverException::class)) {
-            $this->expectException(NearMissValueResolverException::class);
-            $this->expectExceptionMessage('Cannot find mapping for "stdClass": declare one using either the #[MapEntity] attribute or mapped route parameters.');
-        }
+        $this->expectException(NearMissValueResolverException::class);
+        $this->expectExceptionMessage('Cannot find mapping for "stdClass": declare one using either the #[MapEntity] attribute or mapped route parameters.');
 
         $this->assertSame([], $resolver->resolve($request, $argument));
     }

@@ -27,18 +27,14 @@ abstract class AbstractSchemaListener
     protected function getIsSameDatabaseChecker(Connection $connection): \Closure
     {
         return static function (\Closure $exec) use ($connection): bool {
-            $schemaManager = method_exists($connection, 'createSchemaManager') ? $connection->createSchemaManager() : $connection->getSchemaManager();
+            $schemaManager = $connection->createSchemaManager();
             $checkTable = 'schema_subscriber_check_'.bin2hex(random_bytes(7));
             $table = new Table($checkTable);
             $table->addColumn('id', Types::INTEGER)
                 ->setAutoincrement(true)
                 ->setNotnull(true);
 
-            if (class_exists(PrimaryKeyConstraint::class)) {
-                $table->addPrimaryKeyConstraint(new PrimaryKeyConstraint(null, [new UnqualifiedName(Identifier::unquoted('id'))], true));
-            } else {
-                $table->setPrimaryKey(['id']);
-            }
+            $table->addPrimaryKeyConstraint(new PrimaryKeyConstraint(null, [new UnqualifiedName(Identifier::unquoted('id'))], true));
 
             $schemaManager->createTable($table);
 

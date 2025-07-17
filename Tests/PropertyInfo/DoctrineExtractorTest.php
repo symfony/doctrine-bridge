@@ -15,7 +15,6 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\EventManager;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Schema\DefaultSchemaManagerFactory;
-use Doctrine\DBAL\Types\BigIntType;
 use Doctrine\DBAL\Types\Type as DBALType;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\Driver\AttributeDriver;
@@ -42,11 +41,7 @@ class DoctrineExtractorTest extends TestCase
         $config = ORMSetup::createConfiguration(true);
         $config->setMetadataDriverImpl(new AttributeDriver([__DIR__.'/../Tests/Fixtures' => 'Symfony\Bridge\Doctrine\Tests\Fixtures'], true));
         $config->setSchemaManagerFactory(new DefaultSchemaManagerFactory());
-        if (\PHP_VERSION_ID >= 80400 && method_exists($config, 'enableNativeLazyObjects')) {
-            $config->enableNativeLazyObjects(true);
-        } else {
-            $config->setLazyGhostObjectEnabled(true);
-        }
+        $config->enableNativeLazyObjects(true);
 
         $eventManager = new EventManager();
         $entityManager = new EntityManager(DriverManager::getConnection(['driver' => 'pdo_sqlite'], $config, $eventManager), $config, $eventManager);
@@ -68,7 +63,6 @@ class DoctrineExtractorTest extends TestCase
             'time',
             'timeImmutable',
             'dateInterval',
-            'jsonArray',
             'simpleArray',
             'float',
             'decimal',
@@ -154,16 +148,9 @@ class DoctrineExtractorTest extends TestCase
      */
     public static function typeProvider(): iterable
     {
-        // DBAL 4 has a special fallback strategy for BINGINT (int -> string)
-        if (!method_exists(BigIntType::class, 'getName')) {
-            $expectedBigIntType = Type::union(Type::int(), Type::string());
-        } else {
-            $expectedBigIntType = Type::string();
-        }
-
         yield ['id', Type::int()];
         yield ['guid', Type::string()];
-        yield ['bigint', $expectedBigIntType];
+        yield ['bigint', Type::union(Type::int(), Type::string())];
         yield ['time', Type::object(\DateTime::class)];
         yield ['timeImmutable', Type::object(\DateTimeImmutable::class)];
         yield ['dateInterval', Type::object(\DateInterval::class)];
@@ -171,7 +158,6 @@ class DoctrineExtractorTest extends TestCase
         yield ['decimal', Type::string()];
         yield ['bool', Type::bool()];
         yield ['binary', Type::resource()];
-        yield ['jsonArray', Type::array()];
         yield ['foo', Type::nullable(Type::object(DoctrineRelation::class))];
         yield ['bar', Type::collection(Type::object(Collection::class), Type::object(DoctrineRelation::class), Type::int())];
         yield ['indexedRguid', Type::collection(Type::object(Collection::class), Type::object(DoctrineRelation::class), Type::string())];

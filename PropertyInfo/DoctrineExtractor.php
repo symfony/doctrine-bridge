@@ -12,7 +12,6 @@
 namespace Symfony\Bridge\Doctrine\PropertyInfo;
 
 use Doctrine\Common\Collections\Collection;
-use Doctrine\DBAL\Types\BigIntType;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\AssociationMapping;
@@ -130,8 +129,7 @@ class DoctrineExtractor implements PropertyListExtractorInterface, PropertyTypeE
 
         $nullable = $metadata instanceof ClassMetadata && $metadata->isNullable($property);
 
-        // DBAL 4 has a special fallback strategy for BINGINT (int -> string)
-        if (Types::BIGINT === $typeOfField && !method_exists(BigIntType::class, 'getName')) {
+        if (Types::BIGINT === $typeOfField) {
             return $nullable ? Type::nullable(Type::union(Type::int(), Type::string())) : Type::union(Type::int(), Type::string());
         }
 
@@ -231,7 +229,6 @@ class DoctrineExtractor implements PropertyListExtractorInterface, PropertyTypeE
             Types::BOOLEAN => TypeIdentifier::BOOL,
             Types::BLOB,
             Types::BINARY => TypeIdentifier::RESOURCE,
-            'object', // DBAL < 4
             Types::DATE_MUTABLE,
             Types::DATETIME_MUTABLE,
             Types::DATETIMETZ_MUTABLE,
@@ -242,8 +239,6 @@ class DoctrineExtractor implements PropertyListExtractorInterface, PropertyTypeE
             Types::DATETIMETZ_IMMUTABLE,
             Types::TIME_IMMUTABLE,
             Types::DATEINTERVAL => TypeIdentifier::OBJECT,
-            'array', // DBAL < 4
-            'json_array', // DBAL < 3
             Types::SIMPLE_ARRAY => TypeIdentifier::ARRAY,
             default => null,
         };

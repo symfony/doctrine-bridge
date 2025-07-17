@@ -30,7 +30,6 @@ use Symfony\Bridge\Doctrine\Tests\Fixtures\SingleIntIdNoToStringEntity;
 use Symfony\Bridge\Doctrine\Tests\Fixtures\SingleStringCastableIdEntity;
 use Symfony\Bridge\Doctrine\Tests\Fixtures\SingleStringIdEntity;
 use Symfony\Component\Form\ChoiceList\LazyChoiceList;
-use Symfony\Component\Form\ChoiceList\Loader\LazyChoiceLoader;
 use Symfony\Component\Form\ChoiceList\View\ChoiceGroupView;
 use Symfony\Component\Form\ChoiceList\View\ChoiceView;
 use Symfony\Component\Form\Exception\RuntimeException;
@@ -1762,10 +1761,6 @@ class EntityTypeTest extends BaseTypeTestCase
 
     public function testEmptyChoicesWhenLazy()
     {
-        if (!class_exists(LazyChoiceLoader::class)) {
-            $this->markTestSkipped('This test requires symfony/form 7.2 or superior.');
-        }
-
         $entity1 = new SingleIntIdEntity(1, 'Foo');
         $entity2 = new SingleIntIdEntity(2, 'Bar');
         $this->persist([$entity1, $entity2]);
@@ -1784,10 +1779,6 @@ class EntityTypeTest extends BaseTypeTestCase
 
     public function testLoadedChoicesWhenLazyAndBoundData()
     {
-        if (!class_exists(LazyChoiceLoader::class)) {
-            $this->markTestSkipped('This test requires symfony/form 7.2 or superior.');
-        }
-
         $entity1 = new SingleIntIdEntity(1, 'Foo');
         $entity2 = new SingleIntIdEntity(2, 'Bar');
         $this->persist([$entity1, $entity2]);
@@ -1807,10 +1798,6 @@ class EntityTypeTest extends BaseTypeTestCase
 
     public function testLoadedChoicesWhenLazyAndSubmittedData()
     {
-        if (!class_exists(LazyChoiceLoader::class)) {
-            $this->markTestSkipped('This test requires symfony/form 7.2 or superior.');
-        }
-
         $entity1 = new SingleIntIdEntity(1, 'Foo');
         $entity2 = new SingleIntIdEntity(2, 'Bar');
         $this->persist([$entity1, $entity2]);
@@ -1831,10 +1818,6 @@ class EntityTypeTest extends BaseTypeTestCase
 
     public function testEmptyChoicesWhenLazyAndEmptyDataIsSubmitted()
     {
-        if (!class_exists(LazyChoiceLoader::class)) {
-            $this->markTestSkipped('This test requires symfony/form 7.2 or superior.');
-        }
-
         $entity1 = new SingleIntIdEntity(1, 'Foo');
         $entity2 = new SingleIntIdEntity(2, 'Bar');
         $this->persist([$entity1, $entity2]);
@@ -1854,10 +1837,6 @@ class EntityTypeTest extends BaseTypeTestCase
 
     public function testErrorOnSubmitInvalidValuesWhenLazyAndCustomQueryBuilder()
     {
-        if (!class_exists(LazyChoiceLoader::class)) {
-            $this->markTestSkipped('This test requires symfony/form 7.2 or superior.');
-        }
-
         $entity1 = new SingleIntIdEntity(1, 'Foo');
         $entity2 = new SingleIntIdEntity(2, 'Bar');
         $this->persist([$entity1, $entity2]);

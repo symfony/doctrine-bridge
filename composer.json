@@ -27,8 +27,8 @@
     "require-dev": {
         "doctrine/collections": "^1.8|^2.0",
         "doctrine/data-fixtures": "^1.1|^2",
-        "doctrine/dbal": "^3.6|^4",
-        "doctrine/orm": "^2.15|^3",
+        "doctrine/dbal": "^4.3",
+        "doctrine/orm": "^3.4",
         "psr/log": "^1|^2|^3",
         "symfony/cache": "^7.4|^8.0",
         "symfony/config": "^7.4|^8.0",
@@ -51,9 +51,9 @@
     },
     "conflict": {
         "doctrine/collections": "<1.8",
-        "doctrine/dbal": "<3.6",
+        "doctrine/dbal": "<4.3",
         "doctrine/lexer": "<1.1",
-        "doctrine/orm": "<2.15",
+        "doctrine/orm": "<3.4",
         "symfony/property-info": "<8.0"
     },
     "autoload": {

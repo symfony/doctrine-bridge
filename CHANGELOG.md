@@ -4,6 +4,7 @@ CHANGELOG
 8.0
 ---
 
+ * Remove support for auto-mapping Doctrine entities to controller arguments; use explicit mapping instead
  * Make `ProxyCacheWarmer` class `final`
 
 7.4

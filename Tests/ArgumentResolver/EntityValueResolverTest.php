@@ -64,9 +64,6 @@ class EntityValueResolverTest extends TestCase
         $this->assertSame([], $resolver->resolve($request, $argument));
     }
 
-    /**
-     * @group legacy
-     */
     public function testResolveWithNoIdAndDataOptional()
     {
         $manager = $this->createMock(ObjectManager::class);
@@ -247,9 +244,6 @@ class EntityValueResolverTest extends TestCase
         yield ['foo'];
     }
 
-    /**
-     * @group legacy
-     */
     public function testResolveGuessOptional()
     {
         $manager = $this->createMock(ObjectManager::class);
@@ -262,11 +256,7 @@ class EntityValueResolverTest extends TestCase
         $argument = $this->createArgument('stdClass', new MapEntity(), 'arg', true);
 
         $metadata = $this->createMock(ClassMetadata::class);
-        $manager->expects($this->once())
-            ->method('getClassMetadata')
-            ->with('stdClass')
-            ->willReturn($metadata);
-
+        $manager->expects($this->never())->method('getClassMetadata');
         $manager->expects($this->never())->method('getRepository');
 
         $this->expectException(NearMissValueResolverException::class);

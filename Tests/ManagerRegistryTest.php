@@ -105,7 +105,7 @@ class ManagerRegistryTest extends TestCase
     }
 
     /**
-     * When performing an entity manager lazy service reset, the reset operations may re-use the container
+     * When performing an entity manager lazy service reset, the reset operations may reuse the container
      * to create a "fresh" service: when doing so, it can happen that the "fresh" service is itself a proxy.
      *
      * Because of that, the proxy will be populated with a wrapped value that is itself a proxy: repeating

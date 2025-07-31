@@ -18,6 +18,7 @@ use Doctrine\DBAL\Platforms\MySQLPlatform;
 use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
 use Doctrine\DBAL\Types\ConversionException;
 use Doctrine\DBAL\Types\Type;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\AbstractUid;
@@ -140,9 +141,7 @@ final class UuidTypeTest extends TestCase
         $this->assertEquals('uuid', $this->type->getName());
     }
 
-    /**
-     * @dataProvider provideSqlDeclarations
-     */
+    #[DataProvider('provideSqlDeclarations')]
     public function testGetGuidTypeDeclarationSQL(AbstractPlatform $platform, string $expectedDeclaration)
     {
         $this->assertEquals($expectedDeclaration, $this->type->getSqlDeclaration(['length' => 36], $platform));

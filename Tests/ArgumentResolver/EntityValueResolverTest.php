@@ -16,6 +16,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Persistence\ObjectRepository;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -109,9 +110,7 @@ class EntityValueResolverTest extends TestCase
         $this->assertSame([], $resolver->resolve($request, $argument));
     }
 
-    /**
-     * @dataProvider idsProvider
-     */
+    #[DataProvider('idsProvider')]
     public function testResolveWithId(string|int $id)
     {
         $manager = $this->createMock(ObjectManager::class);
@@ -137,9 +136,7 @@ class EntityValueResolverTest extends TestCase
         $this->assertSame([$object], $resolver->resolve($request, $argument));
     }
 
-    /**
-     * @dataProvider idsProvider
-     */
+    #[DataProvider('idsProvider')]
     public function testResolveWithIdAndTypeAlias(string|int $id)
     {
         $manager = $this->getMockBuilder(ObjectManager::class)->getMock();

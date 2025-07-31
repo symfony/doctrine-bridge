@@ -294,9 +294,7 @@ class DoctrineExtractorTest extends TestCase
         $this->assertNull($this->createExtractor()->getType(DoctrineEnum::class, 'enumCustom'));
     }
 
-    /**
-     * @dataProvider typeProvider
-     */
+    #[DataProvider('typeProvider')]
     public function testExtract(string $property, ?Type $type)
     {
         $this->assertEquals($type, $this->createExtractor()->getType(DoctrineDummy::class, $property, []));

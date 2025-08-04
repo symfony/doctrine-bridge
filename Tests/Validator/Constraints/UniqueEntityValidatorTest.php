@@ -17,6 +17,7 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Tools\SchemaTool;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\ObjectManager;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Bridge\Doctrine\Tests\DoctrineTestHelper;
 use Symfony\Bridge\Doctrine\Tests\Fixtures\AssociatedEntityDto;
@@ -218,10 +219,8 @@ class UniqueEntityValidatorTest extends ConstraintValidatorTestCase
         $this->assertNoViolation();
     }
 
-    /**
-     * @dataProvider provideConstraintsWithIgnoreNullDisabled
-     * @dataProvider provideConstraintsWithIgnoreNullEnabledOnFirstField
-     */
+    #[DataProvider('provideConstraintsWithIgnoreNullDisabled')]
+    #[DataProvider('provideConstraintsWithIgnoreNullEnabledOnFirstField')]
     public function testValidateUniquenessWithIgnoreNullDisableOnSecondField(UniqueEntity $constraint)
     {
         $entity1 = new DoubleNameEntity(1, 'Foo', null);
@@ -254,9 +253,7 @@ class UniqueEntityValidatorTest extends ConstraintValidatorTestCase
         yield 'Named arguments' => [new UniqueEntity(message: 'myMessage', fields: ['name', 'name2'], em: 'foo', ignoreNull: false)];
     }
 
-    /**
-     * @dataProvider provideConstraintsWithIgnoreNullEnabled
-     */
+    #[DataProvider('provideConstraintsWithIgnoreNullEnabled')]
     public function testAllConfiguredFieldsAreCheckedOfBeingMappedByDoctrineWithIgnoreNullEnabled(UniqueEntity $constraint)
     {
         $entity1 = new SingleIntIdEntity(1, null);
@@ -265,10 +262,8 @@ class UniqueEntityValidatorTest extends ConstraintValidatorTestCase
         $this->validator->validate($entity1, $constraint);
     }
 
-    /**
-     * @dataProvider provideConstraintsWithIgnoreNullEnabled
-     * @dataProvider provideConstraintsWithIgnoreNullEnabledOnFirstField
-     */
+    #[DataProvider('provideConstraintsWithIgnoreNullEnabled')]
+    #[DataProvider('provideConstraintsWithIgnoreNullEnabledOnFirstField')]
     public function testNoValidationIfFirstFieldIsNullAndNullValuesAreIgnored(UniqueEntity $constraint)
     {
         $entity1 = new DoubleNullableNameEntity(1, null, 'Foo');
@@ -365,9 +360,7 @@ class UniqueEntityValidatorTest extends ConstraintValidatorTestCase
         $this->assertNoViolation();
     }
 
-    /**
-     * @dataProvider resultTypesProvider
-     */
+    #[DataProvider('resultTypesProvider')]
     public function testValidateResultTypes($entity1, $result)
     {
         $constraint = new UniqueEntity(
@@ -768,9 +761,7 @@ class UniqueEntityValidatorTest extends ConstraintValidatorTestCase
             ->assertRaised();
     }
 
-    /**
-     * @dataProvider resultWithEmptyIterator
-     */
+    #[DataProvider('resultWithEmptyIterator')]
     public function testValidateUniquenessWithEmptyIterator($entity, $result)
     {
         $constraint = new UniqueEntity(

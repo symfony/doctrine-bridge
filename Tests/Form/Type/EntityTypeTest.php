@@ -16,6 +16,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Tools\SchemaTool;
 use Doctrine\Persistence\ManagerRegistry;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Bridge\Doctrine\Form\DoctrineOrmExtension;
 use Symfony\Bridge\Doctrine\Form\DoctrineOrmTypeGuesser;
@@ -118,9 +119,7 @@ class EntityTypeTest extends BaseTypeTestCase
         ]);
     }
 
-    /**
-     * @dataProvider choiceTranslationDomainProvider
-     */
+    #[DataProvider('choiceTranslationDomainProvider')]
     public function testChoiceTranslationDomainIsDisabledByDefault($expanded)
     {
         $entity1 = new SingleIntIdEntity(1, 'Foo');

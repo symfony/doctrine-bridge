@@ -14,13 +14,12 @@ namespace Symfony\Bridge\Doctrine\Tests\Security\RememberMe;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Schema\DefaultSchemaManagerFactory;
 use Doctrine\ORM\ORMSetup;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use Symfony\Bridge\Doctrine\Security\RememberMe\DoctrineTokenProvider;
 
-/**
- * @requires extension pdo_pgsql
- *
- * @group integration
- */
+#[Group('integration')]
+#[RequiresPhpExtension('pdo_pgsql')]
 class DoctrineTokenProviderPostgresTest extends DoctrineTokenProviderTest
 {
     public static function setUpBeforeClass(): void

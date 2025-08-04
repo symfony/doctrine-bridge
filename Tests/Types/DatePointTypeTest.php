@@ -94,9 +94,9 @@ final class DatePointTypeTest extends TestCase
     {
         if (interface_exists(Exception::class)) {
             // DBAL 4+
-            return new SQLitePlatform();
+            return new \Doctrine\DBAL\Platforms\SQLitePlatform();
         }
 
-        return new SQLitePlatform();
+        return new \Doctrine\DBAL\Platforms\SqlitePlatform();
     }
 }

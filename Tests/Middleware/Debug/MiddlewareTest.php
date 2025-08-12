@@ -61,16 +61,16 @@ class MiddlewareTest extends TestCase
         ], $config);
 
         $this->conn->executeQuery(<<<EOT
-CREATE TABLE products (
-	id INTEGER PRIMARY KEY,
-	name TEXT NOT NULL,
-	price REAL NOT NULL,
-	stock INTEGER NOT NULL,
-	picture BLOB NULL,
-	tags TEXT NULL,
-	created_at TEXT NULL
-);
-EOT);
+            CREATE TABLE products (
+            	id INTEGER PRIMARY KEY,
+            	name TEXT NOT NULL,
+            	price REAL NOT NULL,
+            	stock INTEGER NOT NULL,
+            	picture BLOB NULL,
+            	tags TEXT NULL,
+            	created_at TEXT NULL
+            );
+            EOT);
     }
 
     private function getResourceFromString(string $str)
@@ -114,9 +114,9 @@ EOT);
         $this->init();
 
         $sql = <<<EOT
-INSERT INTO products(name, price, stock, picture, tags, created_at)
-VALUES (?, ?, ?, ?, ?, ?)
-EOT;
+            INSERT INTO products(name, price, stock, picture, tags, created_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+            EOT;
 
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(1, 'product1');
@@ -142,9 +142,9 @@ EOT;
         $this->init();
 
         $sql = <<<EOT
-INSERT INTO products(name, price, stock, picture, tags)
-VALUES (?, ?, ?, ?, ?)
-EOT;
+            INSERT INTO products(name, price, stock, picture, tags)
+            VALUES (?, ?, ?, ?, ?)
+            EOT;
 
         $expectedRes = $res = $this->getResourceFromString('mydata');
 

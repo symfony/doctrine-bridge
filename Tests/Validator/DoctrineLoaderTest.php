@@ -213,7 +213,7 @@ class DoctrineLoaderTest extends TestCase
 
         /** @var PropertyMetadata[] $autoMappingExplicitlyEnabledMetadata */
         $autoMappingExplicitlyEnabledMetadata = $classMetadata->getPropertyMetadata('autoMappingExplicitlyEnabled');
-        $this->assertCount(1, $autoMappingExplicitlyEnabledMetadata[0]->constraints);
+        $this->assertCount(1, $autoMappingExplicitlyEnabledMetadata[0]->getConstraints());
         $this->assertSame(AutoMappingStrategy::ENABLED, $autoMappingExplicitlyEnabledMetadata[0]->getAutoMappingStrategy());
     }
 }

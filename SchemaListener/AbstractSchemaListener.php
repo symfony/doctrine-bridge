@@ -12,7 +12,7 @@
 namespace Symfony\Bridge\Doctrine\SchemaListener;
 
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Exception\TableNotFoundException;
+use Doctrine\DBAL\Exception\DatabaseObjectNotFoundException;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Tools\Event\GenerateSchemaEventArgs;
@@ -44,7 +44,7 @@ abstract class AbstractSchemaListener
                 $schemaManager->dropTable($checkTable);
 
                 return false;
-            } catch (TableNotFoundException) {
+            } catch (DatabaseObjectNotFoundException) {
                 return true;
             }
         };

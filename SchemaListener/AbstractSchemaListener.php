@@ -12,8 +12,9 @@
 namespace Symfony\Bridge\Doctrine\SchemaListener;
 
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception\ConnectionException;
+use Doctrine\DBAL\Exception\DatabaseObjectExistsException;
 use Doctrine\DBAL\Exception\DatabaseObjectNotFoundException;
-use Doctrine\DBAL\Exception\TableNotFoundException;
 use Doctrine\DBAL\Schema\Name\Identifier;
 use Doctrine\DBAL\Schema\Name\UnqualifiedName;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
@@ -29,28 +30,43 @@ abstract class AbstractSchemaListener
     {
         return static function (\Closure $exec) use ($connection): bool {
             $schemaManager = $connection->createSchemaManager();
-            $checkTable = 'schema_subscriber_check_'.bin2hex(random_bytes(7));
-            $table = new Table($checkTable);
+            $key = bin2hex(random_bytes(7));
+            $table = new Table('_schema_subscriber_check');
             $table->addColumn('id', Types::INTEGER)
                 ->setAutoincrement(true)
                 ->setNotnull(true);
+            $table->addColumn('key', Types::STRING)
+                ->setLength(14)
+                ->setNotNull(true)
+            ;
 
             $table->addPrimaryKeyConstraint(new PrimaryKeyConstraint(null, [new UnqualifiedName(Identifier::unquoted('id'))], true));
 
-            $schemaManager->createTable($table);
+            try {
+                $schemaManager->createTable($table);
+            } catch (DatabaseObjectExistsException) {
+            }
+
+            $connection->executeStatement('INSERT INTO _schema_subscriber_check (key) VALUES (:key)', ['key' => $key], ['key' => Types::STRING]);
 
             try {
-                $exec(\sprintf('DROP TABLE %s', $checkTable));
-            } catch (\Exception) {
-                // ignore
+                $exec('DELETE FROM _schema_subscriber_check WHERE key == :key', ['key' => $key], ['key' => Types::STRING]);
+            } catch (DatabaseObjectNotFoundException|ConnectionException) {
             }
 
             try {
-                $schemaManager->dropTable($checkTable);
+                $rowCount = $connection->executeStatement('DELETE FROM _schema_subscriber_check WHERE key == :key', ['key' => $key], ['key' => Types::STRING]);
 
-                return false;
-            } catch (DatabaseObjectNotFoundException) {
-                return true;
+                return 0 === $rowCount;
+            } finally {
+                [$count] = $connection->executeQuery('SELECT count(id) FROM _schema_subscriber_check')->fetchOne();
+
+                if (!$count) {
+                    try {
+                        $schemaManager->dropTable('_schema_subscriber_check');
+                    } catch (DatabaseObjectNotFoundException) {
+                    }
+                }
             }
         };
     }

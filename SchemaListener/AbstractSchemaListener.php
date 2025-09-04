@@ -59,13 +59,9 @@ abstract class AbstractSchemaListener
             }
 
             try {
-                $rowCount = $connection->executeStatement('DELETE FROM _schema_subscriber_check WHERE key == :key', ['key' => $key], ['key' => Types::STRING]);
-
-                return 0 === $rowCount;
+                return !$connection->executeStatement('DELETE FROM _schema_subscriber_check WHERE key == :key', ['key' => $key], ['key' => Types::STRING]);
             } finally {
-                [$count] = $connection->executeQuery('SELECT count(id) FROM _schema_subscriber_check')->fetchOne();
-
-                if (!$count) {
+                if (!$connection->executeQuery('SELECT count(id) FROM _schema_subscriber_check')->fetchOne()) {
                     try {
                         $schemaManager->dropTable('_schema_subscriber_check');
                     } catch (DatabaseObjectNotFoundException) {

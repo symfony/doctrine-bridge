@@ -52,7 +52,7 @@ class ManagerRegistryTest extends TestCase
     }
 
     #[DataProvider('provideResetServiceWithNativeLazyObjectsCases')]
-    #[RequiresPhp('8.4')]
+    #[RequiresPhp('>=8.4')]
     public function testResetServiceWithNativeLazyObjects(string $class)
     {
         $container = new $class();

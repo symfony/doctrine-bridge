@@ -26,6 +26,9 @@ abstract class AbstractSchemaListener
 {
     abstract public function postGenerateSchema(GenerateSchemaEventArgs $event): void;
 
+    /**
+     * @return \Closure(\Closure(string): mixed): bool
+     */
     protected function getIsSameDatabaseChecker(Connection $connection): \Closure
     {
         return static function (\Closure $exec) use ($connection): bool {
@@ -35,7 +38,7 @@ abstract class AbstractSchemaListener
             $table->addColumn('id', Types::INTEGER)
                 ->setAutoincrement(true)
                 ->setNotnull(true);
-            $table->addColumn('key', Types::STRING)
+            $table->addColumn('random_key', Types::STRING)
                 ->setLength(14)
                 ->setNotNull(true)
             ;
@@ -47,15 +50,15 @@ abstract class AbstractSchemaListener
             } catch (DatabaseObjectExistsException) {
             }
 
-            $connection->executeStatement('INSERT INTO _schema_subscriber_check (key) VALUES (:key)', ['key' => $key], ['key' => Types::STRING]);
+            $connection->executeStatement('INSERT INTO _schema_subscriber_check (random_key) VALUES (:key)', ['key' => $key], ['key' => Types::STRING]);
 
             try {
-                $exec('DELETE FROM _schema_subscriber_check WHERE key == :key', ['key' => $key], ['key' => Types::STRING]);
+                $exec(\sprintf('DELETE FROM _schema_subscriber_check WHERE random_key = %s', $connection->getDatabasePlatform()->quoteStringLiteral($key)));
             } catch (DatabaseObjectNotFoundException|ConnectionException) {
             }
 
             try {
-                return !$connection->executeStatement('DELETE FROM _schema_subscriber_check WHERE key == :key', ['key' => $key], ['key' => Types::STRING]);
+                return !$connection->executeStatement('DELETE FROM _schema_subscriber_check WHERE random_key = :key', ['key' => $key], ['key' => Types::STRING]);
             } finally {
                 if (!$connection->executeQuery('SELECT count(id) FROM _schema_subscriber_check')->fetchOne()) {
                     try {

@@ -63,7 +63,11 @@ final class DoctrineTokenProvider implements TokenProviderInterface, TokenVerifi
 
         [$class, $username, $value, $last_used] = $row;
 
-        return new PersistentToken($class, $username, $series, $value, new \DateTimeImmutable($last_used));
+        if (method_exists(PersistentToken::class, 'getClass')) {
+            return new PersistentToken($class, $username, $series, $value, new \DateTimeImmutable($last_used), false);
+        }
+
+        return new PersistentToken($username, $series, $value, new \DateTimeImmutable($last_used));
     }
 
     public function deleteTokenBySeries(string $series): void
@@ -166,7 +170,14 @@ final class DoctrineTokenProvider implements TokenProviderInterface, TokenVerifi
         try {
             $this->deleteTokenBySeries($tmpSeries);
             $lastUsed = \DateTime::createFromInterface($lastUsed);
-            $this->createNewToken(new PersistentToken(method_exists($token, 'getClass') ? $token->getClass(false) : '', $token->getUserIdentifier(), $tmpSeries, $token->getTokenValue(), $lastUsed));
+
+            if (method_exists(PersistentToken::class, 'getClass')) {
+                $persistentToken = new PersistentToken($token->getClass(false), $token->getUserIdentifier(), $tmpSeries, $token->getTokenValue(), $lastUsed, false);
+            } else {
+                $persistentToken = new PersistentToken($token->getUserIdentifier(), $tmpSeries, $token->getTokenValue(), $lastUsed);
+            }
+
+            $this->createNewToken($persistentToken);
 
             $this->conn->commit();
         } catch (\Exception $e) {

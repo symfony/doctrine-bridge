@@ -171,6 +171,24 @@ class EntityUserProviderTest extends TestCase
         $provider->loadUserByIdentifier('name');
     }
 
+    public function testLoadUserByIdentifierShouldPassAttributesToTheUserLoader()
+    {
+        $repository = $this->createMock(UserLoaderRepository::class);
+        $repository->expects($this->once())
+            ->method('loadUserByIdentifier')
+            ->with('name', ['foo' => 'bar'])
+            ->willReturn(
+                $this->createMock(UserInterface::class)
+            );
+
+        $provider = new EntityUserProvider(
+            $this->getManager($this->getObjectManager($repository)),
+            'Symfony\Bridge\Doctrine\Tests\Fixtures\User'
+        );
+
+        $provider->loadUserByIdentifier('name', ['foo' => 'bar']);
+    }
+
     public function testLoadUserByIdentifierShouldDeclineInvalidInterface()
     {
         $repository = $this->createMock(ObjectRepository::class);

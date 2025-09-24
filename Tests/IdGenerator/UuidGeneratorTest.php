@@ -15,6 +15,7 @@ use Doctrine\ORM\EntityManager;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bridge\Doctrine\IdGenerator\UuidGenerator;
 use Symfony\Component\Uid\Factory\UuidFactory;
+use Symfony\Component\Uid\TimeBasedUidInterface;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Uid\UuidV4;
 use Symfony\Component\Uid\UuidV6;
@@ -47,13 +48,13 @@ class UuidGeneratorTest extends TestCase
     {
         $em = (new \ReflectionClass(EntityManager::class))->newInstanceWithoutConstructor();
         $generator = new UuidGenerator();
-        $this->assertInstanceOf(UuidV6::class, $generator->generate($em, new Entity()));
+        $this->assertInstanceOf(TimeBasedUidInterface::class, $generator->generate($em, new Entity()));
 
         $generator = $generator->randomBased();
         $this->assertInstanceOf(UuidV4::class, $generator->generate($em, new Entity()));
 
         $generator = $generator->timeBased();
-        $this->assertInstanceOf(UuidV6::class, $generator->generate($em, new Entity()));
+        $this->assertInstanceOf(TimeBasedUidInterface::class, $generator->generate($em, new Entity()));
 
         $generator = $generator->nameBased('prop1', Uuid::NAMESPACE_OID);
         $this->assertEquals(Uuid::v5(new Uuid(Uuid::NAMESPACE_OID), '3'), $generator->generate($em, new Entity()));

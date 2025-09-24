@@ -12,6 +12,7 @@ CHANGELOG
 
  * Deprecate `UniqueEntity::getRequiredOptions()` and `UniqueEntity::getDefaultOption()`
  * Use a single table named `_schema_subscriber_check` in schema listeners to detect same database connections
+ * Add support for `Symfony\Component\Clock\DatePoint` as `DayPointType` and `TimePointType` Doctrine type
 
 7.3
 ---

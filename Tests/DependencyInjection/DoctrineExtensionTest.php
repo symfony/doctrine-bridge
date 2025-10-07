@@ -12,6 +12,8 @@
 namespace Symfony\Bridge\Doctrine\Tests\DependencyInjection;
 
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bridge\Doctrine\DependencyInjection\AbstractDoctrineExtension;
@@ -23,6 +25,8 @@ use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 /**
  * @author  Fabio B. Silva <fabio.bat.silva@gmail.com>
  */
+#[IgnoreDeprecations]
+#[Group('legacy')]
 class DoctrineExtensionTest extends TestCase
 {
     private MockObject&AbstractDoctrineExtension $extension;

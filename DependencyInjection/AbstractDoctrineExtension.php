@@ -17,10 +17,14 @@ use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
+trigger_deprecation('symfony/doctrine-bridge', '7.4', 'The "%s" class is deprecated, the code is incorporated into the extension classes of Doctrine bundles.', AbstractDoctrineExtension::class);
+
 /**
  * This abstract classes groups common code that Doctrine Object Manager extensions (ORM, MongoDB, CouchDB) need.
  *
  * @author Benjamin Eberlei <kontakt@beberlei.de>
+ *
+ * @deprecated since Symfony 7.4, the code is incorporated into the extension classes of Doctrine bundles
  */
 abstract class AbstractDoctrineExtension extends Extension
 {

@@ -124,7 +124,7 @@ class DoctrineOrmTypeGuesser implements FormTypeGuesserInterface
     public function guessMaxLength(string $class, string $property): ?ValueGuess
     {
         $ret = $this->getMetadata($class);
-        if ($ret && isset($ret[0]->fieldMappings[$property]) && !$ret[0]->hasAssociation($property)) {
+        if ($ret && isset($ret[0]->fieldMappings[$property])) {
             $mapping = $ret[0]->getFieldMapping($property);
 
             $length = $mapping instanceof FieldMapping ? $mapping->length : ($mapping['length'] ?? null);
@@ -144,7 +144,7 @@ class DoctrineOrmTypeGuesser implements FormTypeGuesserInterface
     public function guessPattern(string $class, string $property): ?ValueGuess
     {
         $ret = $this->getMetadata($class);
-        if ($ret && isset($ret[0]->fieldMappings[$property]) && !$ret[0]->hasAssociation($property)) {
+        if ($ret && isset($ret[0]->fieldMappings[$property])) {
             if (\in_array($ret[0]->getTypeOfField($property), [Types::DECIMAL, Types::FLOAT], true)) {
                 return new ValueGuess(null, Guess::MEDIUM_CONFIDENCE);
             }

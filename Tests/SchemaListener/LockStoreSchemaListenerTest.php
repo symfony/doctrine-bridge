@@ -34,7 +34,7 @@ class LockStoreSchemaListenerTest extends TestCase
         $lockStore = $this->createMock(DoctrineDbalStore::class);
         $lockStore->expects($this->once())
             ->method('configureSchema')
-            ->with($schema, $this->callback(fn () => true));
+            ->with($schema, $this->callback(static fn () => true));
 
         $subscriber = new LockStoreSchemaListener((static fn () => yield $lockStore)());
         $subscriber->postGenerateSchema($event);

@@ -71,7 +71,7 @@ class ORMQueryBuilderLoader implements EntityLoaderInterface
             $parameterType = ArrayParameterType::STRING;
 
             // Like above, but we just filter out empty strings.
-            $values = array_values(array_filter($values, fn ($v) => '' !== (string) $v));
+            $values = array_values(array_filter($values, static fn ($v) => '' !== (string) $v));
 
             // Convert values into right type
             if (Type::hasType($type)) {

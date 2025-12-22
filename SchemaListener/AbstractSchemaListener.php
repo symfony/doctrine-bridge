@@ -58,7 +58,7 @@ abstract class AbstractSchemaListener
 
             try {
                 $exec(\sprintf('DELETE FROM _schema_subscriber_check WHERE random_key = %s', $connection->getDatabasePlatform()->quoteStringLiteral($key)));
-            } catch (DatabaseObjectNotFoundException|ConnectionException) {
+            } catch (DatabaseObjectNotFoundException|ConnectionException|\PDOException) {
             }
 
             try {

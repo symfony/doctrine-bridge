@@ -60,6 +60,10 @@ class DoctrinePingConnectionMiddleware extends AbstractDoctrineMiddleware
     {
         $connection = $entityManager->getConnection();
 
+        if (!$connection->isConnected()) {
+            return;
+        }
+
         try {
             $this->executeDummySql($connection);
         } catch (DBALException) {

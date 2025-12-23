@@ -50,6 +50,7 @@ class DoctrinePingConnectionMiddlewareTest extends MiddlewareTestCase
     public function testMiddlewarePingOk()
     {
         $this->connection = $this->createMock(Connection::class);
+        $this->connection->method('isConnected')->willReturn(true);
         $this->entityManager = $this->createStub(EntityManagerInterface::class);
         $this->entityManager->method('getConnection')->willReturn($this->connection);
         $this->managerRegistry = $this->createStub(ManagerRegistry::class);
@@ -85,6 +86,7 @@ class DoctrinePingConnectionMiddlewareTest extends MiddlewareTestCase
     public function testMiddlewarePingResetEntityManager()
     {
         $this->connection = $this->createStub(Connection::class);
+        $this->connection->method('isConnected')->willReturn(true);
         $this->entityManager = $this->createMock(EntityManagerInterface::class);
         $this->entityManager->method('getConnection')->willReturn($this->connection);
         $this->managerRegistry = $this->createMock(ManagerRegistry::class);
@@ -197,6 +199,7 @@ class DoctrinePingConnectionMiddlewareTest extends MiddlewareTestCase
     private function connectionExpectingOnePing(): Connection
     {
         $connection = $this->createMock(Connection::class);
+        $connection->method('isConnected')->willReturn(true);
         $connection->method('getDatabasePlatform')->willReturn($this->mockPlatform());
         $connection->expects($this->once())->method('executeQuery');
 

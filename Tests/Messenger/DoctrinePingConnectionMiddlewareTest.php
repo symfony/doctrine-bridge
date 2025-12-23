@@ -17,7 +17,6 @@ use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Result;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
-use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Bridge\Doctrine\Messenger\DoctrinePingConnectionMiddleware;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Exception\UnrecoverableMessageHandlingException;
@@ -26,20 +25,20 @@ use Symfony\Component\Messenger\Test\Middleware\MiddlewareTestCase;
 
 class DoctrinePingConnectionMiddlewareTest extends MiddlewareTestCase
 {
-    private Connection&MockObject $connection;
-    private EntityManagerInterface&MockObject $entityManager;
-    private ManagerRegistry&MockObject $managerRegistry;
+    private Connection $connection;
+    private EntityManagerInterface $entityManager;
+    private ManagerRegistry $managerRegistry;
     private DoctrinePingConnectionMiddleware $middleware;
     private string $entityManagerName = 'default';
 
     protected function setUp(): void
     {
-        $this->connection = $this->createMock(Connection::class);
+        $this->connection = $this->createStub(Connection::class);
 
-        $this->entityManager = $this->createMock(EntityManagerInterface::class);
+        $this->entityManager = $this->createStub(EntityManagerInterface::class);
         $this->entityManager->method('getConnection')->willReturn($this->connection);
 
-        $this->managerRegistry = $this->createMock(ManagerRegistry::class);
+        $this->managerRegistry = $this->createStub(ManagerRegistry::class);
         $this->managerRegistry->method('getManager')->willReturn($this->entityManager);
 
         $this->middleware = new DoctrinePingConnectionMiddleware(
@@ -50,6 +49,15 @@ class DoctrinePingConnectionMiddlewareTest extends MiddlewareTestCase
 
     public function testMiddlewarePingOk()
     {
+        $this->connection = $this->createMock(Connection::class);
+        $this->connection->method('isConnected')->willReturn(true);
+        $this->entityManager = $this->createStub(EntityManagerInterface::class);
+        $this->entityManager->method('getConnection')->willReturn($this->connection);
+        $this->managerRegistry = $this->createStub(ManagerRegistry::class);
+        $this->managerRegistry->method('getManager')->willReturn($this->entityManager);
+
+        $middleware = new DoctrinePingConnectionMiddleware($this->managerRegistry, $this->entityManagerName);
+
         $this->connection->method('getDatabasePlatform')
             ->willReturn($this->mockPlatform());
 
@@ -59,10 +67,10 @@ class DoctrinePingConnectionMiddlewareTest extends MiddlewareTestCase
                 static $counter = 0;
 
                 if (1 === ++$counter) {
-                    throw $this->createMock(DBALException::class);
+                    throw $this->createStub(DBALException::class);
                 }
 
-                return $this->createMock(Result::class);
+                return $this->createStub(Result::class);
             });
 
         $this->connection->expects($this->once())
@@ -72,13 +80,26 @@ class DoctrinePingConnectionMiddlewareTest extends MiddlewareTestCase
         $envelope = new Envelope(new \stdClass(), [
             new ConsumedByWorkerStamp(),
         ]);
-        $this->middleware->handle($envelope, $this->getStackMock());
+        $middleware->handle($envelope, $this->getStackMock());
     }
 
     public function testMiddlewarePingResetEntityManager()
     {
+        $this->connection = $this->createStub(Connection::class);
+        $this->connection->method('isConnected')->willReturn(true);
+        $this->entityManager = $this->createMock(EntityManagerInterface::class);
+        $this->entityManager->method('getConnection')->willReturn($this->connection);
+        $this->managerRegistry = $this->createMock(ManagerRegistry::class);
+        $this->managerRegistry->method('getManager')->willReturn($this->entityManager);
+
+        $middleware = new DoctrinePingConnectionMiddleware(
+            $this->managerRegistry,
+            $this->entityManagerName
+        );
+
         $this->connection->method('getDatabasePlatform')
             ->willReturn($this->mockPlatform());
+        $this->connection->method('executeQuery')->willReturn($this->createStub(Result::class));
 
         $this->entityManager->expects($this->once())
             ->method('isOpen')
@@ -92,15 +113,14 @@ class DoctrinePingConnectionMiddlewareTest extends MiddlewareTestCase
         $envelope = new Envelope(new \stdClass(), [
             new ConsumedByWorkerStamp(),
         ]);
-        $this->middleware->handle($envelope, $this->getStackMock());
+        $middleware->handle($envelope, $this->getStackMock());
     }
 
     public function testInvalidEntityManagerThrowsException()
     {
-        $managerRegistry = $this->createMock(ManagerRegistry::class);
+        $managerRegistry = $this->createStub(ManagerRegistry::class);
         $managerRegistry
             ->method('getManager')
-            ->with('unknown_manager')
             ->willThrowException(new \InvalidArgumentException());
 
         $middleware = new DoctrinePingConnectionMiddleware($managerRegistry, 'unknown_manager');
@@ -112,19 +132,113 @@ class DoctrinePingConnectionMiddlewareTest extends MiddlewareTestCase
 
     public function testMiddlewareNoPingInNonWorkerContext()
     {
+        $this->connection = $this->createMock(Connection::class);
+        $this->entityManager = $this->createStub(EntityManagerInterface::class);
+        $this->entityManager->method('getConnection')->willReturn($this->connection);
+        $this->managerRegistry = $this->createStub(ManagerRegistry::class);
+        $this->managerRegistry->method('getManager')->willReturn($this->entityManager);
+
+        $middleware = new DoctrinePingConnectionMiddleware(
+            $this->managerRegistry,
+            $this->entityManagerName
+        );
+
         $this->connection->expects($this->never())
             ->method('close')
         ;
 
         $envelope = new Envelope(new \stdClass());
-        $this->middleware->handle($envelope, $this->getStackMock());
+        $middleware->handle($envelope, $this->getStackMock());
     }
 
-    private function mockPlatform(): AbstractPlatform&MockObject
+    public function testMiddlewarePingsAllConnectionsWhenEntityManagerNameIsNull()
     {
-        $platform = $this->createMock(AbstractPlatform::class);
+        $firstConnection = $this->connectionExpectingOnePing();
+        $secondConnection = $this->connectionExpectingOnePing();
+
+        $registry = $this->createRegistryForManagers([
+            'first' => $this->createManagerWithConnection($firstConnection),
+            'second' => $this->createManagerWithConnection($secondConnection),
+        ]);
+
+        $middleware = new DoctrinePingConnectionMiddleware($registry);
+
+        $envelope = new Envelope(new \stdClass(), [
+            new ConsumedByWorkerStamp(),
+        ]);
+        $middleware->handle($envelope, $this->getStackMock());
+    }
+
+    public function testMiddlewareResetsClosedManagersWhenEntityManagerNameIsNull()
+    {
+        $registry = $this->createRegistryForManagers([
+            'open' => $this->createManagerWithConnection($this->connectionExpectingOnePing(), true),
+            'closed' => $this->createManagerWithConnection($this->connectionExpectingOnePing(), false),
+        ], true);
+        $registry->expects($this->once())
+            ->method('resetManager')
+            ->with('closed')
+        ;
+
+        $middleware = new DoctrinePingConnectionMiddleware($registry);
+
+        $envelope = new Envelope(new \stdClass(), [
+            new ConsumedByWorkerStamp(),
+        ]);
+        $middleware->handle($envelope, $this->getStackMock());
+    }
+
+    private function mockPlatform(): AbstractPlatform
+    {
+        $platform = $this->createStub(AbstractPlatform::class);
         $platform->method('getDummySelectSQL')->willReturn('SELECT 1');
 
         return $platform;
+    }
+
+    private function connectionExpectingOnePing(): Connection
+    {
+        $connection = $this->createMock(Connection::class);
+        $connection->method('isConnected')->willReturn(true);
+        $connection->method('getDatabasePlatform')->willReturn($this->mockPlatform());
+        $connection->expects($this->once())->method('executeQuery');
+
+        return $connection;
+    }
+
+    private function createManagerWithConnection(Connection $connection, ?bool $isOpen = null): EntityManagerInterface
+    {
+        $manager = null === $isOpen ? $this->createStub(EntityManagerInterface::class) : $this->createMock(EntityManagerInterface::class);
+        $manager->method('getConnection')->willReturn($connection);
+
+        if (null !== $isOpen) {
+            $manager->expects($this->once())->method('isOpen')->willReturn($isOpen);
+        }
+
+        return $manager;
+    }
+
+    /**
+     * @param array<string, EntityManagerInterface> $managers
+     */
+    private function createRegistryForManagers(array $managers, bool $withExpectations = false): ManagerRegistry
+    {
+        $defaultName = array_key_first($managers);
+
+        $registry = $withExpectations ? $this->createMock(ManagerRegistry::class) : $this->createStub(ManagerRegistry::class);
+
+        if ($withExpectations) {
+            $registry->expects($this->any())->method('getManagerNames')->willReturn(array_combine(array_keys($managers), array_keys($managers)));
+            $registry->expects($this->any())->method('getManager')->willReturnCallback(static function (?string $name) use ($managers, $defaultName): ?EntityManagerInterface {
+                return $managers[$name ?? $defaultName] ?? null;
+            });
+        } else {
+            $registry->method('getManagerNames')->willReturn(array_combine(array_keys($managers), array_keys($managers)));
+            $registry->method('getManager')->willReturnCallback(static function (?string $name) use ($managers, $defaultName): ?EntityManagerInterface {
+                return $managers[$name ?? $defaultName] ?? null;
+            });
+        }
+
+        return $registry;
     }
 }

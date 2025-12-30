@@ -24,7 +24,7 @@ class DoctrineDbalCacheAdapterSchemaListenerTest extends TestCase
     public function testPostGenerateSchema()
     {
         $schema = new Schema();
-        $dbalConnection = $this->createMock(Connection::class);
+        $dbalConnection = $this->createStub(Connection::class);
         $entityManager = $this->createMock(EntityManagerInterface::class);
         $entityManager->expects($this->once())
             ->method('getConnection')

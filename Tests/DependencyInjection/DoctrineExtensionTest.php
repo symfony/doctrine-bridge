@@ -11,7 +11,6 @@
 
 namespace Symfony\Bridge\Doctrine\Tests\DependencyInjection;
 
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bridge\Doctrine\DependencyInjection\AbstractDoctrineExtension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -24,26 +23,40 @@ use Symfony\Component\HttpKernel\Bundle\BundleInterface;
  */
 class DoctrineExtensionTest extends TestCase
 {
-    private MockObject&AbstractDoctrineExtension $extension;
+    private AbstractDoctrineExtension $extension;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->extension = $this
-            ->getMockBuilder(AbstractDoctrineExtension::class)
-            ->onlyMethods([
-                'getMappingResourceConfigDirectory',
-                'getObjectManagerElementName',
-                'getMappingObjectDefaultName',
-                'getMappingResourceExtension',
-                'getMetadataDriverClass',
-                'load',
-            ])
-            ->getMock()
-        ;
+        if (method_exists($this, 'getStubBuilder')) {
+            $this->extension = self::getStubBuilder(AbstractDoctrineExtension::class)
+                ->onlyMethods([
+                    'getMappingResourceConfigDirectory',
+                    'getObjectManagerElementName',
+                    'getMappingObjectDefaultName',
+                    'getMappingResourceExtension',
+                    'getMetadataDriverClass',
+                    'load',
+                ])
+                ->getStub()
+            ;
+        } else {
+            $this->extension = $this
+                ->getMockBuilder(AbstractDoctrineExtension::class)
+                ->onlyMethods([
+                    'getMappingResourceConfigDirectory',
+                    'getObjectManagerElementName',
+                    'getMappingObjectDefaultName',
+                    'getMappingResourceExtension',
+                    'getMetadataDriverClass',
+                    'load',
+                ])
+                ->getMock()
+            ;
+        }
 
-        $this->extension->expects($this->any())
+        $this->extension
             ->method('getObjectManagerElementName')
             ->willReturnCallback(fn ($name) => 'doctrine.orm.'.$name);
 

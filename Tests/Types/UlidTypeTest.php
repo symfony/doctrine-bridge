@@ -99,7 +99,7 @@ final class UlidTypeTest extends TestCase
 
     public function testUlidInterfaceConvertsToPHPValue()
     {
-        $ulid = $this->createMock(AbstractUid::class);
+        $ulid = $this->createStub(AbstractUid::class);
         $actual = $this->type->convertToPHPValue($ulid, new SQLitePlatform());
 
         $this->assertSame($ulid, $actual);

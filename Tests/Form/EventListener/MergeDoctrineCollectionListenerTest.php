@@ -25,13 +25,13 @@ class MergeDoctrineCollectionListenerTest extends TestCase
 {
     private ArrayCollection $collection;
     private EventDispatcher $dispatcher;
-    private MockObject&FormFactoryInterface $factory;
+    private FormFactoryInterface $factory;
 
     protected function setUp(): void
     {
         $this->collection = new ArrayCollection(['test']);
         $this->dispatcher = new EventDispatcher();
-        $this->factory = $this->createMock(FormFactoryInterface::class);
+        $this->factory = $this->createStub(FormFactoryInterface::class);
     }
 
     protected function getBuilder()

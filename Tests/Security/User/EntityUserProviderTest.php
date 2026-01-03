@@ -25,6 +25,7 @@ use Symfony\Bridge\Doctrine\Security\User\UserLoaderInterface;
 use Symfony\Bridge\Doctrine\Tests\DoctrineTestHelper;
 use Symfony\Bridge\Doctrine\Tests\Fixtures\User;
 use Symfony\Component\Security\Core\Exception\UserNotFoundException;
+use Symfony\Component\Security\Core\User\InMemoryUser;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -161,7 +162,7 @@ class EntityUserProviderTest extends TestCase
             ->method('loadUserByIdentifier')
             ->with('name')
             ->willReturn(
-                $this->createMock(UserInterface::class)
+                new InMemoryUser('John', 'password')
             );
 
         $provider = new EntityUserProvider(
@@ -179,7 +180,7 @@ class EntityUserProviderTest extends TestCase
             ->method('loadUserByIdentifier')
             ->with('name', ['foo' => 'bar'])
             ->willReturn(
-                $this->createMock(UserInterface::class)
+                new InMemoryUser('John', 'password')
             );
 
         $provider = new EntityUserProvider(
@@ -192,7 +193,7 @@ class EntityUserProviderTest extends TestCase
 
     public function testLoadUserByIdentifierShouldDeclineInvalidInterface()
     {
-        $repository = $this->createMock(ObjectRepository::class);
+        $repository = $this->createStub(ObjectRepository::class);
 
         $provider = new EntityUserProvider(
             $this->getManager($this->getObjectManager($repository)),
@@ -249,8 +250,8 @@ class EntityUserProviderTest extends TestCase
 
     private function getManager($em, $name = null)
     {
-        $manager = $this->createMock(ManagerRegistry::class);
-        $manager->expects($this->any())
+        $manager = $this->createStub(ManagerRegistry::class);
+        $manager
             ->method('getManager')
             ->with($this->equalTo($name))
             ->willReturn($em);
@@ -260,7 +261,7 @@ class EntityUserProviderTest extends TestCase
 
     private function getObjectManager($repository)
     {
-        $objectManager = $this->createMock(ObjectManager::class);
+        $objectManager = $this->createStub(ObjectManager::class);
         $objectManager->method('getRepository')
             ->willReturn($repository);
 

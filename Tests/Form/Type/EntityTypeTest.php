@@ -16,7 +16,6 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Tools\SchemaTool;
 use Doctrine\Persistence\ManagerRegistry;
-use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Bridge\Doctrine\Form\DoctrineOrmExtension;
 use Symfony\Bridge\Doctrine\Form\DoctrineOrmTypeGuesser;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -55,12 +54,12 @@ class EntityTypeTest extends BaseTypeTestCase
     private const COMPOSITE_STRING_IDENT_CLASS = CompositeStringIdEntity::class;
 
     private EntityManager $em;
-    private MockObject&ManagerRegistry $emRegistry;
+    private ManagerRegistry $emRegistry;
 
     protected function setUp(): void
     {
         $this->em = DoctrineTestHelper::createTestEntityManager();
-        $this->emRegistry = $this->createRegistryMock('default', $this->em);
+        $this->emRegistry = $this->createRegistryMock($this->em);
 
         parent::setUp();
 
@@ -1138,6 +1137,7 @@ class EntityTypeTest extends BaseTypeTestCase
 
     public function testGetManagerForClassIfNoEm()
     {
+        $this->emRegistry = $this->createMock(ManagerRegistry::class);
         $this->emRegistry->expects($this->never())
             ->method('getManager');
 
@@ -1146,7 +1146,10 @@ class EntityTypeTest extends BaseTypeTestCase
             ->with(self::SINGLE_IDENT_CLASS)
             ->willReturn($this->em);
 
-        $this->factory->createNamed('name', static::TESTED_TYPE, null, [
+        $factory = Forms::createFormFactoryBuilder()
+            ->addExtensions($this->getExtensions())
+            ->getFormFactory();
+        $factory->createNamed('name', static::TESTED_TYPE, null, [
             'class' => self::SINGLE_IDENT_CLASS,
             'required' => false,
             'choice_label' => 'name',
@@ -1155,13 +1158,17 @@ class EntityTypeTest extends BaseTypeTestCase
 
     public function testExplicitEm()
     {
+        $this->emRegistry = $this->createMock(ManagerRegistry::class);
         $this->emRegistry->expects($this->never())
             ->method('getManager');
 
         $this->emRegistry->expects($this->never())
             ->method('getManagerForClass');
 
-        $this->factory->createNamed('name', static::TESTED_TYPE, null, [
+        $factory = Forms::createFormFactoryBuilder()
+            ->addExtensions($this->getExtensions())
+            ->getFormFactory();
+        $factory->createNamed('name', static::TESTED_TYPE, null, [
             'em' => $this->em,
             'class' => self::SINGLE_IDENT_CLASS,
             'choice_label' => 'name',
@@ -1280,12 +1287,12 @@ class EntityTypeTest extends BaseTypeTestCase
         $this->assertSame($choiceList1, $choiceList3);
     }
 
-    protected function createRegistryMock($name, $em): MockObject&ManagerRegistry
+    private function createRegistryMock($em): ManagerRegistry
     {
-        $registry = $this->createMock(ManagerRegistry::class);
-        $registry->expects($this->any())
+        $registry = $this->createStub(ManagerRegistry::class);
+        $registry
             ->method('getManager')
-            ->with($this->equalTo($name))
+            ->with($this->equalTo('default'))
             ->willReturn($em);
 
         return $registry;

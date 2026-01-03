@@ -27,8 +27,8 @@ use Symfony\Component\Messenger\Test\Middleware\MiddlewareTestCase;
 class DoctrinePingConnectionMiddlewareTest extends MiddlewareTestCase
 {
     private Connection&MockObject $connection;
-    private EntityManagerInterface&MockObject $entityManager;
-    private ManagerRegistry&MockObject $managerRegistry;
+    private EntityManagerInterface $entityManager;
+    private ManagerRegistry $managerRegistry;
     private DoctrinePingConnectionMiddleware $middleware;
     private string $entityManagerName = 'default';
 
@@ -36,10 +36,10 @@ class DoctrinePingConnectionMiddlewareTest extends MiddlewareTestCase
     {
         $this->connection = $this->createMock(Connection::class);
 
-        $this->entityManager = $this->createMock(EntityManagerInterface::class);
+        $this->entityManager = $this->createStub(EntityManagerInterface::class);
         $this->entityManager->method('getConnection')->willReturn($this->connection);
 
-        $this->managerRegistry = $this->createMock(ManagerRegistry::class);
+        $this->managerRegistry = $this->createStub(ManagerRegistry::class);
         $this->managerRegistry->method('getManager')->willReturn($this->entityManager);
 
         $this->middleware = new DoctrinePingConnectionMiddleware(
@@ -59,10 +59,10 @@ class DoctrinePingConnectionMiddlewareTest extends MiddlewareTestCase
                 static $counter = 0;
 
                 if (1 === ++$counter) {
-                    throw $this->createMock(DBALException::class);
+                    throw $this->createStub(DBALException::class);
                 }
 
-                return $this->createMock(Result::class);
+                return $this->createStub(Result::class);
             });
 
         $this->connection->expects($this->once())
@@ -77,27 +77,36 @@ class DoctrinePingConnectionMiddlewareTest extends MiddlewareTestCase
 
     public function testMiddlewarePingResetEntityManager()
     {
-        $this->connection->method('getDatabasePlatform')
+        $this->connection
+            ->expects($this->once())
+            ->method('getDatabasePlatform')
             ->willReturn($this->mockPlatform());
 
-        $this->entityManager->expects($this->once())
+        $entityManager = $this->createMock(EntityManagerInterface::class);
+        $entityManager->method('getConnection')->willReturn($this->connection);
+        $entityManager->expects($this->once())
             ->method('isOpen')
             ->willReturn(false)
         ;
-        $this->managerRegistry->expects($this->once())
+
+        $managerRegistry = $this->createMock(ManagerRegistry::class);
+        $managerRegistry->method('getManager')->willReturn($entityManager);
+        $managerRegistry->expects($this->once())
             ->method('resetManager')
             ->with($this->entityManagerName)
         ;
+        $middleware = new DoctrinePingConnectionMiddleware($managerRegistry, $this->entityManagerName);
 
         $envelope = new Envelope(new \stdClass(), [
             new ConsumedByWorkerStamp(),
         ]);
-        $this->middleware->handle($envelope, $this->getStackMock());
+        $middleware->handle($envelope, $this->getStackMock());
     }
 
     public function testInvalidEntityManagerThrowsException()
     {
-        $managerRegistry = $this->createMock(ManagerRegistry::class);
+        $this->connection->expects($this->never())->method('getDatabasePlatform');
+        $managerRegistry = $this->createStub(ManagerRegistry::class);
         $managerRegistry
             ->method('getManager')
             ->with('unknown_manager')
@@ -120,9 +129,9 @@ class DoctrinePingConnectionMiddlewareTest extends MiddlewareTestCase
         $this->middleware->handle($envelope, $this->getStackMock());
     }
 
-    private function mockPlatform(): AbstractPlatform&MockObject
+    private function mockPlatform(): AbstractPlatform
     {
-        $platform = $this->createMock(AbstractPlatform::class);
+        $platform = $this->createStub(AbstractPlatform::class);
         $platform->method('getDummySelectSQL')->willReturn('SELECT 1');
 
         return $platform;

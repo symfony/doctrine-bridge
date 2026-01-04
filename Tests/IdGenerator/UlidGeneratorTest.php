@@ -34,8 +34,8 @@ class UlidGeneratorTest extends TestCase
     {
         $ulid = new Ulid('00000000000000000000000000');
         $em = (new \ReflectionClass(EntityManager::class))->newInstanceWithoutConstructor();
-        $factory = $this->createMock(UlidFactory::class);
-        $factory->expects($this->any())
+        $factory = $this->createStub(UlidFactory::class);
+        $factory
             ->method('create')
             ->willReturn($ulid);
         $generator = new UlidGenerator($factory);

@@ -18,6 +18,8 @@ use Doctrine\Persistence\ObjectManager;
 use Doctrine\Persistence\ObjectRepository;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bridge\Doctrine\ArgumentResolver\EntityValueResolver;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
@@ -32,7 +34,7 @@ class EntityValueResolverTest extends TestCase
 {
     public function testResolveWithoutClass()
     {
-        $manager = $this->createMock(ObjectManager::class);
+        $manager = $this->createStub(ObjectManager::class);
         $registry = $this->createRegistry($manager);
         $resolver = new EntityValueResolver($registry);
 
@@ -44,7 +46,7 @@ class EntityValueResolverTest extends TestCase
 
     public function testResolveWithoutAttribute()
     {
-        $manager = $this->createMock(ObjectManager::class);
+        $manager = $this->createStub(ObjectManager::class);
         $registry = $this->createRegistry($manager);
         $resolver = new EntityValueResolver($registry, null, new MapEntity(disabled: true));
 
@@ -67,7 +69,7 @@ class EntityValueResolverTest extends TestCase
 
     public function testResolveWithNoIdAndDataOptional()
     {
-        $manager = $this->createMock(ObjectManager::class);
+        $manager = $this->createStub(ObjectManager::class);
         $registry = $this->createRegistry($manager);
         $resolver = new EntityValueResolver($registry);
 
@@ -131,7 +133,7 @@ class EntityValueResolverTest extends TestCase
     #[DataProvider('idsProvider')]
     public function testResolveWithIdAndTypeAlias(string|int $id)
     {
-        $manager = $this->getMockBuilder(ObjectManager::class)->getMock();
+        $manager = $this->createMock(ObjectManager::class);
         $registry = $this->createRegistry($manager);
         $resolver = new EntityValueResolver(
             $registry,
@@ -178,7 +180,7 @@ class EntityValueResolverTest extends TestCase
 
     public function testResolveWithArrayIdNullValue()
     {
-        $manager = $this->createMock(ObjectManager::class);
+        $manager = $this->createStub(ObjectManager::class);
         $registry = $this->createRegistry($manager);
         $resolver = new EntityValueResolver($registry);
 
@@ -220,7 +222,7 @@ class EntityValueResolverTest extends TestCase
 
     public function testUsedProperIdentifier()
     {
-        $manager = $this->createMock(ObjectManager::class);
+        $manager = $this->createStub(ObjectManager::class);
         $registry = $this->createRegistry($manager);
         $resolver = new EntityValueResolver($registry);
 
@@ -252,7 +254,6 @@ class EntityValueResolverTest extends TestCase
 
         $argument = $this->createArgument('stdClass', new MapEntity(), 'arg', true);
 
-        $metadata = $this->createMock(ClassMetadata::class);
         $manager->expects($this->never())->method('getClassMetadata');
         $manager->expects($this->never())->method('getRepository');
 
@@ -332,7 +333,7 @@ class EntityValueResolverTest extends TestCase
 
     public function testExceptionWithExpressionIfNoLanguageAvailable()
     {
-        $manager = $this->createMock(ObjectManager::class);
+        $manager = $this->createStub(ObjectManager::class);
         $registry = $this->createRegistry($manager);
         $resolver = new EntityValueResolver($registry);
 
@@ -495,7 +496,7 @@ class EntityValueResolverTest extends TestCase
 
     public function testAlreadyResolved()
     {
-        $manager = $this->createMock(ObjectManager::class);
+        $manager = $this->createStub(ObjectManager::class);
         $registry = $this->createRegistry($manager);
         $resolver = new EntityValueResolver($registry);
 
@@ -512,11 +513,11 @@ class EntityValueResolverTest extends TestCase
         return new ArgumentMetadata($name, $class ?? \stdClass::class, false, false, null, $isNullable, $entity ? [$entity] : []);
     }
 
-    private function createRegistry(?ObjectManager $manager = null): ManagerRegistry&MockObject
+    private function createRegistry(?ObjectManager $manager = null): ManagerRegistry
     {
-        $registry = $this->createMock(ManagerRegistry::class);
+        $registry = $this->createStub(ManagerRegistry::class);
 
-        $registry->expects($this->any())
+        $registry
             ->method('getManagerForClass')
             ->willReturn($manager);
 

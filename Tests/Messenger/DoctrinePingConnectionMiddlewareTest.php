@@ -33,12 +33,12 @@ class DoctrinePingConnectionMiddlewareTest extends MiddlewareTestCase
 
     protected function setUp(): void
     {
-        $this->connection = $this->createStub(Connection::class);
+        $this->connection = $this->createMock(Connection::class);
 
-        $this->entityManager = $this->createStub(EntityManagerInterface::class);
+        $this->entityManager = $this->createMock(EntityManagerInterface::class);
         $this->entityManager->method('getConnection')->willReturn($this->connection);
 
-        $this->managerRegistry = $this->createStub(ManagerRegistry::class);
+        $this->managerRegistry = $this->createMock(ManagerRegistry::class);
         $this->managerRegistry->method('getManager')->willReturn($this->entityManager);
 
         $this->middleware = new DoctrinePingConnectionMiddleware(
@@ -118,6 +118,7 @@ class DoctrinePingConnectionMiddlewareTest extends MiddlewareTestCase
 
     public function testInvalidEntityManagerThrowsException()
     {
+        $this->connection->expects($this->never())->method('getDatabasePlatform');
         $managerRegistry = $this->createStub(ManagerRegistry::class);
         $managerRegistry
             ->method('getManager')

@@ -34,8 +34,8 @@ class UuidGeneratorTest extends TestCase
     {
         $uuid = new UuidV4();
         $em = (new \ReflectionClass(EntityManager::class))->newInstanceWithoutConstructor();
-        $factory = $this->createMock(UuidFactory::class);
-        $factory->expects($this->any())
+        $factory = $this->createStub(UuidFactory::class);
+        $factory
             ->method('create')
             ->willReturn($uuid);
         $generator = new UuidGenerator($factory);

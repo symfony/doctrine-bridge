@@ -171,7 +171,7 @@ class EntityValueResolverTest extends TestCase
 
     public function testResolveWithNullId()
     {
-        $manager = $this->createMock(ObjectManager::class);
+        $manager = $this->createStub(ObjectManager::class);
         $registry = $this->createRegistry($manager);
         $resolver = new EntityValueResolver($registry);
 
@@ -329,8 +329,8 @@ class EntityValueResolverTest extends TestCase
         $conference = new \stdClass();
         $article = new \stdClass();
 
-        $repository = $this->createMock(ObjectRepository::class);
-        $repository->expects($this->any())
+        $repository = $this->createStub(ObjectRepository::class);
+        $repository
             ->method('findOneBy')
             ->willReturnCallback(static fn ($v) => match ($v) {
                 ['slug' => 'vienna-2024'] => $conference,

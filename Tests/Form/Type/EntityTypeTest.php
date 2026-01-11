@@ -234,7 +234,6 @@ class EntityTypeTest extends BaseTypeTestCase
             'em' => 'default',
             'class' => self::SINGLE_IDENT_CLASS,
             'query_builder' => static function () {
-                return;
             },
         ]);
 

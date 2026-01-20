@@ -21,6 +21,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bridge\Doctrine\Form\ChoiceList\ORMQueryBuilderLoader;
 use Symfony\Bridge\Doctrine\Tests\DoctrineTestHelper;
+use Symfony\Bridge\Doctrine\Tests\Fixtures\CustomUuidIdType;
 use Symfony\Bridge\Doctrine\Tests\Fixtures\EmbeddedIdentifierEntity;
 use Symfony\Bridge\Doctrine\Tests\Fixtures\LegacyQueryMock;
 use Symfony\Bridge\Doctrine\Tests\Fixtures\SingleIntIdEntity;
@@ -158,6 +159,9 @@ class ORMQueryBuilderLoaderTest extends TestCase
         if (!Type::hasType('ulid')) {
             Type::addType('ulid', UlidType::class);
         }
+        if (!Type::hasType(CustomUuidIdType::class)) {
+            Type::addType(CustomUuidIdType::class, CustomUuidIdType::class);
+        }
 
         $em = DoctrineTestHelper::createTestEntityManager();
 
@@ -201,6 +205,9 @@ class ORMQueryBuilderLoaderTest extends TestCase
         if (!Type::hasType('ulid')) {
             Type::addType('ulid', UlidType::class);
         }
+        if (!Type::hasType(CustomUuidIdType::class)) {
+            Type::addType(CustomUuidIdType::class, CustomUuidIdType::class);
+        }
 
         $em = DoctrineTestHelper::createTestEntityManager();
 
@@ -218,7 +225,7 @@ class ORMQueryBuilderLoaderTest extends TestCase
         $loader = new ORMQueryBuilderLoader($qb);
 
         $this->expectException(TransformationFailedException::class);
-        $this->expectExceptionMessageMatches('/^Failed to transform "hello" into "(uuid|ulid)"\.$/');
+        $this->expectExceptionMessageMatches('/^Failed to transform "hello" into "(uuid|ulid|Symfony\\\\Bridge\\\\Doctrine\\\\Tests\\\\Fixtures\\\\CustomUuidIdType)"\.$/');
 
         $loader->getEntitiesByIds('id', ['hello']);
     }
@@ -266,6 +273,7 @@ class ORMQueryBuilderLoaderTest extends TestCase
         return [
             ['Symfony\Bridge\Doctrine\Tests\Fixtures\UuidIdEntity'],
             ['Symfony\Bridge\Doctrine\Tests\Fixtures\UlidIdEntity'],
+            ['Symfony\Bridge\Doctrine\Tests\Fixtures\CustomUuidIdEntity'],
         ];
     }
 

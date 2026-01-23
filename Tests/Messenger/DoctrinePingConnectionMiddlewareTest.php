@@ -25,43 +25,23 @@ use Symfony\Component\Messenger\Test\Middleware\MiddlewareTestCase;
 
 class DoctrinePingConnectionMiddlewareTest extends MiddlewareTestCase
 {
-    private Connection $connection;
-    private EntityManagerInterface $entityManager;
-    private ManagerRegistry $managerRegistry;
-    private DoctrinePingConnectionMiddleware $middleware;
     private string $entityManagerName = 'default';
-
-    protected function setUp(): void
-    {
-        $this->connection = $this->createMock(Connection::class);
-
-        $this->entityManager = $this->createMock(EntityManagerInterface::class);
-        $this->entityManager->method('getConnection')->willReturn($this->connection);
-
-        $this->managerRegistry = $this->createMock(ManagerRegistry::class);
-        $this->managerRegistry->method('getManager')->willReturn($this->entityManager);
-
-        $this->middleware = new DoctrinePingConnectionMiddleware(
-            $this->managerRegistry,
-            $this->entityManagerName
-        );
-    }
 
     public function testMiddlewarePingOk()
     {
-        $this->connection = $this->createMock(Connection::class);
-        $this->connection->method('isConnected')->willReturn(true);
-        $this->entityManager = $this->createStub(EntityManagerInterface::class);
-        $this->entityManager->method('getConnection')->willReturn($this->connection);
-        $this->managerRegistry = $this->createStub(ManagerRegistry::class);
-        $this->managerRegistry->method('getManager')->willReturn($this->entityManager);
+        $connection = $this->createMock(Connection::class);
+        $connection->method('isConnected')->willReturn(true);
+        $entityManager = $this->createStub(EntityManagerInterface::class);
+        $entityManager->method('getConnection')->willReturn($connection);
+        $managerRegistry = $this->createStub(ManagerRegistry::class);
+        $managerRegistry->method('getManager')->willReturn($entityManager);
 
-        $middleware = new DoctrinePingConnectionMiddleware($this->managerRegistry, $this->entityManagerName);
+        $middleware = new DoctrinePingConnectionMiddleware($managerRegistry, $this->entityManagerName);
 
-        $this->connection->method('getDatabasePlatform')
+        $connection->method('getDatabasePlatform')
             ->willReturn($this->mockPlatform());
 
-        $this->connection->expects($this->exactly(2))
+        $connection->expects($this->exactly(2))
             ->method('executeQuery')
             ->willReturnCallback(function () {
                 static $counter = 0;
@@ -73,7 +53,7 @@ class DoctrinePingConnectionMiddlewareTest extends MiddlewareTestCase
                 return $this->createStub(Result::class);
             });
 
-        $this->connection->expects($this->once())
+        $connection->expects($this->once())
             ->method('close')
         ;
 
@@ -85,27 +65,27 @@ class DoctrinePingConnectionMiddlewareTest extends MiddlewareTestCase
 
     public function testMiddlewarePingResetEntityManager()
     {
-        $this->connection = $this->createStub(Connection::class);
-        $this->connection->method('isConnected')->willReturn(true);
-        $this->entityManager = $this->createMock(EntityManagerInterface::class);
-        $this->entityManager->method('getConnection')->willReturn($this->connection);
-        $this->managerRegistry = $this->createMock(ManagerRegistry::class);
-        $this->managerRegistry->method('getManager')->willReturn($this->entityManager);
+        $connection = $this->createStub(Connection::class);
+        $connection->method('isConnected')->willReturn(true);
+        $entityManager = $this->createMock(EntityManagerInterface::class);
+        $entityManager->method('getConnection')->willReturn($connection);
+        $managerRegistry = $this->createMock(ManagerRegistry::class);
+        $managerRegistry->method('getManager')->willReturn($entityManager);
 
         $middleware = new DoctrinePingConnectionMiddleware(
-            $this->managerRegistry,
+            $managerRegistry,
             $this->entityManagerName
         );
 
-        $this->connection->method('getDatabasePlatform')
+        $connection->method('getDatabasePlatform')
             ->willReturn($this->mockPlatform());
-        $this->connection->method('executeQuery')->willReturn($this->createStub(Result::class));
+        $connection->method('executeQuery')->willReturn($this->createStub(Result::class));
 
-        $this->entityManager->expects($this->once())
+        $entityManager->expects($this->once())
             ->method('isOpen')
             ->willReturn(false)
         ;
-        $this->managerRegistry->expects($this->once())
+        $managerRegistry->expects($this->once())
             ->method('resetManager')
             ->with($this->entityManagerName)
         ;
@@ -118,7 +98,8 @@ class DoctrinePingConnectionMiddlewareTest extends MiddlewareTestCase
 
     public function testInvalidEntityManagerThrowsException()
     {
-        $this->connection->expects($this->never())->method('getDatabasePlatform');
+        $connection = $this->createMock(Connection::class);
+        $connection->expects($this->never())->method('getDatabasePlatform');
         $managerRegistry = $this->createStub(ManagerRegistry::class);
         $managerRegistry
             ->method('getManager')
@@ -133,18 +114,18 @@ class DoctrinePingConnectionMiddlewareTest extends MiddlewareTestCase
 
     public function testMiddlewareNoPingInNonWorkerContext()
     {
-        $this->connection = $this->createMock(Connection::class);
-        $this->entityManager = $this->createStub(EntityManagerInterface::class);
-        $this->entityManager->method('getConnection')->willReturn($this->connection);
-        $this->managerRegistry = $this->createStub(ManagerRegistry::class);
-        $this->managerRegistry->method('getManager')->willReturn($this->entityManager);
+        $connection = $this->createMock(Connection::class);
+        $entityManager = $this->createStub(EntityManagerInterface::class);
+        $entityManager->method('getConnection')->willReturn($connection);
+        $managerRegistry = $this->createStub(ManagerRegistry::class);
+        $managerRegistry->method('getManager')->willReturn($entityManager);
 
         $middleware = new DoctrinePingConnectionMiddleware(
-            $this->managerRegistry,
+            $managerRegistry,
             $this->entityManagerName
         );
 
-        $this->connection->expects($this->never())
+        $connection->expects($this->never())
             ->method('close')
         ;
 

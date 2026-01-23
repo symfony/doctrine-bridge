@@ -14,7 +14,6 @@ namespace Symfony\Bridge\Doctrine\Tests\Console\ArgumentResolver;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Persistence\ObjectRepository;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bridge\Doctrine\ArgumentResolver\Console\EntityValueResolver;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
@@ -38,7 +37,7 @@ class EntityValueResolverTest extends TestCase
 
     public function testResolveWithoutArgumentAttribute()
     {
-        $manager = $this->createMock(ObjectManager::class);
+        $manager = $this->createStub(ObjectManager::class);
         $registry = $this->createRegistry($manager);
         $resolver = new EntityValueResolver($registry);
 
@@ -68,7 +67,7 @@ class EntityValueResolverTest extends TestCase
 
     public function testResolveWithNoIdAndDataOptional()
     {
-        $manager = $this->createMock(ObjectManager::class);
+        $manager = $this->createStub(ObjectManager::class);
         $registry = $this->createRegistry($manager);
         $resolver = new EntityValueResolver($registry);
 
@@ -276,7 +275,7 @@ class EntityValueResolverTest extends TestCase
 
     public function testAlreadyResolved()
     {
-        $manager = $this->createMock(ObjectManager::class);
+        $manager = $this->createStub(ObjectManager::class);
         $registry = $this->createRegistry($manager);
         $resolver = new EntityValueResolver($registry);
 
@@ -330,11 +329,11 @@ class EntityValueResolverTest extends TestCase
         return implode(', ', $parts);
     }
 
-    private function createRegistry(?ObjectManager $manager = null): ManagerRegistry&MockObject
+    private function createRegistry(?ObjectManager $manager = null): ManagerRegistry
     {
-        $registry = $this->createMock(ManagerRegistry::class);
+        $registry = $this->createStub(ManagerRegistry::class);
 
-        $registry->expects($this->any())
+        $registry
             ->method('getManagerForClass')
             ->willReturn($manager);
 

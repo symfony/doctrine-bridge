@@ -13,6 +13,7 @@ namespace Symfony\Bridge\Doctrine\SchemaListener;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception\DatabaseObjectNotFoundException;
+use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Tools\Event\GenerateSchemaEventArgs;
@@ -20,6 +21,35 @@ use Doctrine\ORM\Tools\Event\GenerateSchemaEventArgs;
 abstract class AbstractSchemaListener
 {
     abstract public function postGenerateSchema(GenerateSchemaEventArgs $event): void;
+
+    protected function filterSchemaChanges(Schema $schema, Connection $connection, callable $configurator): void
+    {
+        $filter = $connection->getConfiguration()->getSchemaAssetsFilter();
+
+        if (null === $filter) {
+            $configurator();
+
+            return;
+        }
+
+        $getNames = static fn ($array) => array_map(static fn ($object) => $object->getName(), $array);
+        $previousTableNames = $getNames($schema->getTables());
+        $previousSequenceNames = $getNames($schema->getSequences());
+
+        $configurator();
+
+        foreach (array_diff($getNames($schema->getTables()), $previousTableNames) as $addedTable) {
+            if (!$filter($addedTable)) {
+                $schema->dropTable($addedTable);
+            }
+        }
+
+        foreach (array_diff($getNames($schema->getSequences()), $previousSequenceNames) as $addedSequence) {
+            if (!$filter($addedSequence)) {
+                $schema->dropSequence($addedSequence);
+            }
+        }
+    }
 
     protected function getIsSameDatabaseChecker(Connection $connection): \Closure
     {

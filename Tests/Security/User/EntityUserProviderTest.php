@@ -253,7 +253,6 @@ class EntityUserProviderTest extends TestCase
         $manager = $this->createStub(ManagerRegistry::class);
         $manager
             ->method('getManager')
-            ->with($this->equalTo($name))
             ->willReturn($em);
 
         return $manager;

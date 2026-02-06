@@ -17,6 +17,7 @@ use Doctrine\DBAL\Exception\DatabaseObjectExistsException;
 use Doctrine\DBAL\Exception\DatabaseObjectNotFoundException;
 use Doctrine\DBAL\Schema\Name\Identifier;
 use Doctrine\DBAL\Schema\Name\UnqualifiedName;
+use Doctrine\DBAL\Schema\NamedObject;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Schema\Table;
@@ -37,7 +38,7 @@ abstract class AbstractSchemaListener
             return;
         }
 
-        $getNames = static fn ($array) => array_map(static fn ($object) => $object->getName(), $array);
+        $getNames = static fn ($array) => array_map(static fn ($object) => $object instanceof NamedObject ? $object->getObjectName()->toString() : $object->getName(), $array);
         $previousTableNames = $getNames($schema->getTables());
         $previousSequenceNames = $getNames($schema->getSequences());
 

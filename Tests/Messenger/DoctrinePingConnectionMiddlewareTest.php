@@ -106,8 +106,9 @@ class DoctrinePingConnectionMiddlewareTest extends MiddlewareTestCase
     public function testInvalidEntityManagerThrowsException()
     {
         $this->connection->expects($this->never())->method('getDatabasePlatform');
-        $managerRegistry = $this->createStub(ManagerRegistry::class);
+        $managerRegistry = $this->createMock(ManagerRegistry::class);
         $managerRegistry
+            ->expects($this->once())
             ->method('getManager')
             ->with('unknown_manager')
             ->willThrowException(new \InvalidArgumentException());

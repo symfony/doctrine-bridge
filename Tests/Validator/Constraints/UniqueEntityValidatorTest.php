@@ -88,11 +88,9 @@ class UniqueEntityValidatorTest extends ConstraintValidatorTestCase
 
         if (null === $em) {
             $registry->method('getManager')
-                ->with($this->equalTo(self::EM_NAME))
                 ->willThrowException(new \InvalidArgumentException());
         } else {
             $registry->method('getManager')
-                ->with($this->equalTo(self::EM_NAME))
                 ->willReturn($em);
         }
 

@@ -100,8 +100,9 @@ class DoctrinePingConnectionMiddlewareTest extends MiddlewareTestCase
     {
         $connection = $this->createMock(Connection::class);
         $connection->expects($this->never())->method('getDatabasePlatform');
-        $managerRegistry = $this->createStub(ManagerRegistry::class);
+        $managerRegistry = $this->createMock(ManagerRegistry::class);
         $managerRegistry
+            ->expects($this->once())
             ->method('getManager')
             ->willThrowException(new \InvalidArgumentException());
 

@@ -1290,7 +1290,6 @@ class EntityTypeTest extends BaseTypeTestCase
         $registry = $this->createStub(ManagerRegistry::class);
         $registry
             ->method('getManager')
-            ->with($this->equalTo('default'))
             ->willReturn($em);
 
         return $registry;

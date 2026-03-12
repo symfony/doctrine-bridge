@@ -28,6 +28,9 @@ abstract class AbstractSchemaListener
 {
     abstract public function postGenerateSchema(GenerateSchemaEventArgs $event): void;
 
+    /**
+     * @param-immediately-invoked-callable $configurator
+     */
     protected function filterSchemaChanges(Schema $schema, Connection $connection, callable $configurator): void
     {
         $filter = $connection->getConfiguration()->getSchemaAssetsFilter();

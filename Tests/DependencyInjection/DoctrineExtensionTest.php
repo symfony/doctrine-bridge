@@ -58,7 +58,7 @@ class DoctrineExtensionTest extends TestCase
 
         $this->extension
             ->method('getObjectManagerElementName')
-            ->willReturnCallback(fn ($name) => 'doctrine.orm.'.$name);
+            ->willReturnCallback(static fn ($name) => 'doctrine.orm.'.$name);
 
         $this->extension
             ->method('getMappingObjectDefaultName')
@@ -328,7 +328,7 @@ class DoctrineExtensionTest extends TestCase
 
         $this->extension
             ->method('getMappingResourceConfigDirectory')
-            ->willReturnCallback(function ($bundleDir) {
+            ->willReturnCallback(static function ($bundleDir) {
                 if (null !== $bundleDir && is_dir($bundleDir.'/config/doctrine')) {
                     return 'config/doctrine';
                 }

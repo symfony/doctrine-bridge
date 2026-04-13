@@ -234,9 +234,7 @@ class EntityTypeTest extends BaseTypeTestCase
         $field = $this->factory->createNamed('name', static::TESTED_TYPE, null, [
             'em' => 'default',
             'class' => self::SINGLE_IDENT_CLASS,
-            'query_builder' => static function () {
-                return;
-            },
+            'query_builder' => static fn () => null,
         ]);
 
         $this->assertEquals([1 => new ChoiceView($entity1, '1', 'Foo'), 2 => new ChoiceView($entity2, '2', 'Bar')], $field->createView()->vars['choices']);

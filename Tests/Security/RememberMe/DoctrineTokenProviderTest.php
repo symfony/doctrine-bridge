@@ -140,7 +140,7 @@ class DoctrineTokenProviderTest extends TestCase
                 class    varchar(100) NOT NULL,
                 username varchar(200) NOT NULL
             );
-SQL
+            SQL
         );
 
         return new DoctrineTokenProvider($connection);

@@ -46,7 +46,7 @@ class DoctrineTokenProviderPostgresTest extends DoctrineTokenProviderTest
         ], $config);
         $connection->{method_exists($connection, 'executeStatement') ? 'executeStatement' : 'executeUpdate'}(<<<'SQL'
             DROP TABLE IF EXISTS rememberme_token;
-SQL
+            SQL
         );
 
         $connection->{method_exists($connection, 'executeStatement') ? 'executeStatement' : 'executeUpdate'}(<<<'SQL'
@@ -57,7 +57,7 @@ SQL
                 class    VARCHAR(100) NOT NULL,
                 username VARCHAR(200) NOT NULL
             );
-SQL
+            SQL
         );
 
         return new DoctrineTokenProvider($connection);

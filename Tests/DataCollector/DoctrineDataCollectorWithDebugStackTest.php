@@ -130,11 +130,10 @@ class DoctrineDataCollectorWithDebugStackTest extends TestCase
                 new \stdClass(),
                 [],
                 <<<EOTXT
-{#%d
-  ⚠: "Object of class "stdClass" could not be converted to string."
-}
-EOTXT
-                ,
+                    {#%d
+                      ⚠: "Object of class "stdClass" could not be converted to string."
+                    }
+                    EOTXT,
                 false,
                 false,
             ],
@@ -142,11 +141,10 @@ EOTXT
                 new StringRepresentableClass(),
                 [],
                 <<<EOTXT
-Symfony\Bridge\Doctrine\Tests\DataCollector\StringRepresentableClass {#%d
-  __toString(): "string representation"
-}
-EOTXT
-                ,
+                    Symfony\Bridge\Doctrine\Tests\DataCollector\StringRepresentableClass {#%d
+                      __toString(): "string representation"
+                    }
+                    EOTXT,
                 false,
             ],
             ['this is not a date', ['date'], "⚠ Could not convert PHP value 'this is not a date'%S to type %Sdate%S. Expected one of the following types: null, DateTime", false, false],
@@ -154,11 +152,10 @@ EOTXT
                 new \stdClass(),
                 ['date'],
                 <<<EOTXT
-{#%d
-  ⚠: "Could not convert PHP value of type %SstdClass%S to type %Sdate%S. Expected one of the following types: null, DateTime"
-}
-EOTXT
-                ,
+                    {#%d
+                      ⚠: "Could not convert PHP value of type %SstdClass%S to type %Sdate%S. Expected one of the following types: null, DateTime"
+                    }
+                    EOTXT,
                 false,
                 false,
             ],

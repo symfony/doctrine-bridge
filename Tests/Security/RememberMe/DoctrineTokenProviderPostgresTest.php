@@ -44,18 +44,18 @@ class DoctrineTokenProviderPostgresTest extends DoctrineTokenProviderTest
             'password' => 'password',
         ], $config);
         $connection->{method_exists($connection, 'executeStatement') ? 'executeStatement' : 'executeUpdate'}(<<<'SQL'
-                        DROP TABLE IF EXISTS rememberme_token;
+            DROP TABLE IF EXISTS rememberme_token;
             SQL
         );
 
         $connection->{method_exists($connection, 'executeStatement') ? 'executeStatement' : 'executeUpdate'}(<<<'SQL'
-                        CREATE TABLE rememberme_token (
-                            series   CHAR(88)     UNIQUE PRIMARY KEY NOT NULL,
-                            value    VARCHAR(88)  NOT NULL, -- CHAR(88) adds spaces at the end
-                            lastUsed TIMESTAMP    NOT NULL,
-                            class    VARCHAR(100) NOT NULL,
-                            username VARCHAR(200) NOT NULL
-                        );
+            CREATE TABLE rememberme_token (
+                series   CHAR(88)     UNIQUE PRIMARY KEY NOT NULL,
+                value    VARCHAR(88)  NOT NULL, -- CHAR(88) adds spaces at the end
+                lastUsed TIMESTAMP    NOT NULL,
+                class    VARCHAR(100) NOT NULL,
+                username VARCHAR(200) NOT NULL
+            );
             SQL
         );
 

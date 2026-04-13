@@ -73,7 +73,7 @@ class DoctrineChoiceLoaderTest extends TestCase
         );
 
         $choices = [$this->obj1, $this->obj2, $this->obj3];
-        $value = function () {};
+        $value = static function () {};
         $choiceList = new ArrayChoiceList($choices, $value);
 
         $this->repository->expects($this->once())
@@ -180,7 +180,7 @@ class DoctrineChoiceLoaderTest extends TestCase
         );
 
         $choices = [$this->obj1, $this->obj2, $this->obj3];
-        $value = fn (\stdClass $object) => $object->name;
+        $value = static fn (\stdClass $object) => $object->name;
 
         $this->repository->expects($this->never())
             ->method('findAll')
@@ -325,7 +325,7 @@ class DoctrineChoiceLoaderTest extends TestCase
         );
 
         $choices = [$this->obj1, $this->obj2, $this->obj3];
-        $value = fn (\stdClass $object) => $object->name;
+        $value = static fn (\stdClass $object) => $object->name;
 
         $this->repository->expects($this->once())
             ->method('findAll')

@@ -219,7 +219,7 @@ class EntityTypeTest extends BaseTypeTestCase
         $this->factory->createNamed('name', static::TESTED_TYPE, null, [
             'em' => 'default',
             'class' => self::SINGLE_IDENT_CLASS,
-            'query_builder' => fn () => new \stdClass(),
+            'query_builder' => static fn () => new \stdClass(),
         ]);
     }
 
@@ -233,7 +233,7 @@ class EntityTypeTest extends BaseTypeTestCase
         $field = $this->factory->createNamed('name', static::TESTED_TYPE, null, [
             'em' => 'default',
             'class' => self::SINGLE_IDENT_CLASS,
-            'query_builder' => function () {
+            'query_builder' => static function () {
                 return;
             },
         ]);
@@ -764,7 +764,7 @@ class EntityTypeTest extends BaseTypeTestCase
             'em' => 'default',
             'class' => self::ITEM_GROUP_CLASS,
             'choice_label' => 'name',
-            'choice_value' => function (?GroupableEntity $entity = null) {
+            'choice_value' => static function (?GroupableEntity $entity = null) {
                 if (null === $entity) {
                     return '';
                 }
@@ -1057,7 +1057,7 @@ class EntityTypeTest extends BaseTypeTestCase
         $field = $this->factory->createNamed('name', static::TESTED_TYPE, null, [
             'em' => 'default',
             'class' => self::SINGLE_IDENT_CLASS,
-            'query_builder' => fn (EntityRepository $repository) => $repository->createQueryBuilder('e')
+            'query_builder' => static fn (EntityRepository $repository) => $repository->createQueryBuilder('e')
                 ->where('e.id IN (1, 2)'),
             'choice_label' => 'name',
         ]);
@@ -1079,7 +1079,7 @@ class EntityTypeTest extends BaseTypeTestCase
         $field = $this->factory->createNamed('name', static::TESTED_TYPE, null, [
             'em' => 'default',
             'class' => self::COMPOSITE_IDENT_CLASS,
-            'query_builder' => fn (EntityRepository $repository) => $repository->createQueryBuilder('e')
+            'query_builder' => static fn (EntityRepository $repository) => $repository->createQueryBuilder('e')
                 ->where('e.id1 IN (10, 50)'),
             'choice_label' => 'name',
         ]);
@@ -1203,13 +1203,13 @@ class EntityTypeTest extends BaseTypeTestCase
         $formBuilder->add('property2', static::TESTED_TYPE, [
             'em' => 'default',
             'class' => self::SINGLE_IDENT_CLASS,
-            'query_builder' => fn (EntityRepository $repo) => $repo->createQueryBuilder('e')->where('e.id IN (1, 2)'),
+            'query_builder' => static fn (EntityRepository $repo) => $repo->createQueryBuilder('e')->where('e.id IN (1, 2)'),
         ]);
 
         $formBuilder->add('property3', static::TESTED_TYPE, [
             'em' => 'default',
             'class' => self::SINGLE_IDENT_CLASS,
-            'query_builder' => fn (EntityRepository $repo) => $repo->createQueryBuilder('e')->where('e.id IN (1, 2)'),
+            'query_builder' => static fn (EntityRepository $repo) => $repo->createQueryBuilder('e')->where('e.id IN (1, 2)'),
         ]);
 
         $form = $formBuilder->getForm();
@@ -1259,13 +1259,13 @@ class EntityTypeTest extends BaseTypeTestCase
         $formBuilder->add('property2', static::TESTED_TYPE, [
             'em' => 'default',
             'class' => self::SINGLE_IDENT_CLASS,
-            'query_builder' => fn (EntityRepository $repo) => $repo->createQueryBuilder('e')->where('e.id = :id')->setParameter('id', 1),
+            'query_builder' => static fn (EntityRepository $repo) => $repo->createQueryBuilder('e')->where('e.id = :id')->setParameter('id', 1),
         ]);
 
         $formBuilder->add('property3', static::TESTED_TYPE, [
             'em' => 'default',
             'class' => self::SINGLE_IDENT_CLASS,
-            'query_builder' => fn (EntityRepository $repo) => $repo->createQueryBuilder('e')->where('e.id = :id')->setParameter('id', 1),
+            'query_builder' => static fn (EntityRepository $repo) => $repo->createQueryBuilder('e')->where('e.id = :id')->setParameter('id', 1),
         ]);
 
         $form = $formBuilder->getForm();
@@ -1752,7 +1752,7 @@ class EntityTypeTest extends BaseTypeTestCase
             ->add('entity_two', self::TESTED_TYPE, [
                 'em' => 'default',
                 'class' => self::SINGLE_IDENT_CLASS,
-                'choice_value' => fn ($choice) => $choice ? $choice->name : '',
+                'choice_value' => static fn ($choice) => $choice ? $choice->name : '',
             ])
             ->createView()
         ;

@@ -176,25 +176,25 @@ class DoctrineExtractorTest extends TestCase
     {
         // DBAL 4 has a special fallback strategy for BINGINT (int -> string)
         if (!method_exists(BigIntType::class, 'getName')) {
-            $expectedBingIntType = fn () => [new LegacyType(LegacyType::BUILTIN_TYPE_INT), new LegacyType(LegacyType::BUILTIN_TYPE_STRING)];
+            $expectedBingIntType = static fn () => [new LegacyType(LegacyType::BUILTIN_TYPE_INT), new LegacyType(LegacyType::BUILTIN_TYPE_STRING)];
         } else {
-            $expectedBingIntType = fn () => [new LegacyType(LegacyType::BUILTIN_TYPE_STRING)];
+            $expectedBingIntType = static fn () => [new LegacyType(LegacyType::BUILTIN_TYPE_STRING)];
         }
 
         return [
-            ['id', fn () => [new LegacyType(LegacyType::BUILTIN_TYPE_INT)]],
-            ['guid', fn () => [new LegacyType(LegacyType::BUILTIN_TYPE_STRING)]],
+            ['id', static fn () => [new LegacyType(LegacyType::BUILTIN_TYPE_INT)]],
+            ['guid', static fn () => [new LegacyType(LegacyType::BUILTIN_TYPE_STRING)]],
             ['bigint', $expectedBingIntType],
-            ['time', fn () => [new LegacyType(LegacyType::BUILTIN_TYPE_OBJECT, false, 'DateTime')]],
-            ['timeImmutable', fn () => [new LegacyType(LegacyType::BUILTIN_TYPE_OBJECT, false, 'DateTimeImmutable')]],
-            ['dateInterval', fn () => [new LegacyType(LegacyType::BUILTIN_TYPE_OBJECT, false, 'DateInterval')]],
-            ['float', fn () => [new LegacyType(LegacyType::BUILTIN_TYPE_FLOAT)]],
-            ['decimal', fn () => [new LegacyType(LegacyType::BUILTIN_TYPE_STRING)]],
-            ['bool', fn () => [new LegacyType(LegacyType::BUILTIN_TYPE_BOOL)]],
-            ['binary', fn () => [new LegacyType(LegacyType::BUILTIN_TYPE_RESOURCE)]],
-            ['jsonArray', fn () => [new LegacyType(LegacyType::BUILTIN_TYPE_ARRAY, false, null, true)]],
-            ['foo', fn () => [new LegacyType(LegacyType::BUILTIN_TYPE_OBJECT, true, 'Symfony\Bridge\Doctrine\Tests\PropertyInfo\Fixtures\DoctrineRelation')]],
-            ['bar', fn () => [new LegacyType(
+            ['time', static fn () => [new LegacyType(LegacyType::BUILTIN_TYPE_OBJECT, false, 'DateTime')]],
+            ['timeImmutable', static fn () => [new LegacyType(LegacyType::BUILTIN_TYPE_OBJECT, false, 'DateTimeImmutable')]],
+            ['dateInterval', static fn () => [new LegacyType(LegacyType::BUILTIN_TYPE_OBJECT, false, 'DateInterval')]],
+            ['float', static fn () => [new LegacyType(LegacyType::BUILTIN_TYPE_FLOAT)]],
+            ['decimal', static fn () => [new LegacyType(LegacyType::BUILTIN_TYPE_STRING)]],
+            ['bool', static fn () => [new LegacyType(LegacyType::BUILTIN_TYPE_BOOL)]],
+            ['binary', static fn () => [new LegacyType(LegacyType::BUILTIN_TYPE_RESOURCE)]],
+            ['jsonArray', static fn () => [new LegacyType(LegacyType::BUILTIN_TYPE_ARRAY, false, null, true)]],
+            ['foo', static fn () => [new LegacyType(LegacyType::BUILTIN_TYPE_OBJECT, true, 'Symfony\Bridge\Doctrine\Tests\PropertyInfo\Fixtures\DoctrineRelation')]],
+            ['bar', static fn () => [new LegacyType(
                 LegacyType::BUILTIN_TYPE_OBJECT,
                 false,
                 'Doctrine\Common\Collections\Collection',
@@ -202,7 +202,7 @@ class DoctrineExtractorTest extends TestCase
                 new LegacyType(LegacyType::BUILTIN_TYPE_INT),
                 new LegacyType(LegacyType::BUILTIN_TYPE_OBJECT, false, 'Symfony\Bridge\Doctrine\Tests\PropertyInfo\Fixtures\DoctrineRelation')
             )]],
-            ['indexedRguid', fn () => [new LegacyType(
+            ['indexedRguid', static fn () => [new LegacyType(
                 LegacyType::BUILTIN_TYPE_OBJECT,
                 false,
                 'Doctrine\Common\Collections\Collection',
@@ -210,7 +210,7 @@ class DoctrineExtractorTest extends TestCase
                 new LegacyType(LegacyType::BUILTIN_TYPE_STRING),
                 new LegacyType(LegacyType::BUILTIN_TYPE_OBJECT, false, 'Symfony\Bridge\Doctrine\Tests\PropertyInfo\Fixtures\DoctrineRelation')
             )]],
-            ['indexedBar', fn () => [new LegacyType(
+            ['indexedBar', static fn () => [new LegacyType(
                 LegacyType::BUILTIN_TYPE_OBJECT,
                 false,
                 'Doctrine\Common\Collections\Collection',
@@ -218,7 +218,7 @@ class DoctrineExtractorTest extends TestCase
                 new LegacyType(LegacyType::BUILTIN_TYPE_STRING),
                 new LegacyType(LegacyType::BUILTIN_TYPE_OBJECT, false, 'Symfony\Bridge\Doctrine\Tests\PropertyInfo\Fixtures\DoctrineRelation')
             )]],
-            ['indexedFoo', fn () => [new LegacyType(
+            ['indexedFoo', static fn () => [new LegacyType(
                 LegacyType::BUILTIN_TYPE_OBJECT,
                 false,
                 'Doctrine\Common\Collections\Collection',
@@ -226,7 +226,7 @@ class DoctrineExtractorTest extends TestCase
                 new LegacyType(LegacyType::BUILTIN_TYPE_STRING),
                 new LegacyType(LegacyType::BUILTIN_TYPE_OBJECT, false, 'Symfony\Bridge\Doctrine\Tests\PropertyInfo\Fixtures\DoctrineRelation')
             )]],
-            ['indexedBaz', fn () => [new LegacyType(
+            ['indexedBaz', static fn () => [new LegacyType(
                 LegacyType::BUILTIN_TYPE_OBJECT,
                 false,
                 Collection::class,
@@ -234,10 +234,10 @@ class DoctrineExtractorTest extends TestCase
                 new LegacyType(LegacyType::BUILTIN_TYPE_INT),
                 new LegacyType(LegacyType::BUILTIN_TYPE_OBJECT, false, DoctrineRelation::class)
             )]],
-            ['simpleArray', fn () => [new LegacyType(LegacyType::BUILTIN_TYPE_ARRAY, false, null, true, new LegacyType(LegacyType::BUILTIN_TYPE_INT), new LegacyType(LegacyType::BUILTIN_TYPE_STRING))]],
+            ['simpleArray', static fn () => [new LegacyType(LegacyType::BUILTIN_TYPE_ARRAY, false, null, true, new LegacyType(LegacyType::BUILTIN_TYPE_INT), new LegacyType(LegacyType::BUILTIN_TYPE_STRING))]],
             ['customFoo', null],
             ['notMapped', null],
-            ['indexedByDt', fn () => [new LegacyType(
+            ['indexedByDt', static fn () => [new LegacyType(
                 LegacyType::BUILTIN_TYPE_OBJECT,
                 false,
                 Collection::class,
@@ -246,7 +246,7 @@ class DoctrineExtractorTest extends TestCase
                 new LegacyType(LegacyType::BUILTIN_TYPE_OBJECT, false, DoctrineRelation::class)
             )]],
             ['indexedByCustomType', null],
-            ['indexedBuz', fn () => [new LegacyType(
+            ['indexedBuz', static fn () => [new LegacyType(
                 LegacyType::BUILTIN_TYPE_OBJECT,
                 false,
                 Collection::class,
@@ -254,7 +254,7 @@ class DoctrineExtractorTest extends TestCase
                 new LegacyType(LegacyType::BUILTIN_TYPE_STRING),
                 new LegacyType(LegacyType::BUILTIN_TYPE_OBJECT, false, DoctrineRelation::class)
             )]],
-            ['dummyGeneratedValueList', fn () => [new LegacyType(
+            ['dummyGeneratedValueList', static fn () => [new LegacyType(
                 LegacyType::BUILTIN_TYPE_OBJECT,
                 false,
                 'Doctrine\Common\Collections\Collection',

@@ -168,3 +168,5 @@ final class UuidTypeTest extends TestCase
         $this->assertTrue($this->type->requiresSQLCommentHint(new SqlitePlatform()));
     }
 }
+
+// @php-cs-fixer-ignore fully_qualified_strict_types

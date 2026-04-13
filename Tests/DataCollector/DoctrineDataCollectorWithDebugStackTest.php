@@ -203,3 +203,5 @@ class StringRepresentableClass
         return 'string representation';
     }
 }
+
+// @php-cs-fixer-ignore fully_qualified_strict_types

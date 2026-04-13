@@ -12,7 +12,6 @@
 namespace Symfony\Bridge\Doctrine\Tests\Form\EventListener;
 
 use Doctrine\Common\Collections\ArrayCollection;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bridge\Doctrine\Form\EventListener\MergeDoctrineCollectionListener;
 use Symfony\Component\EventDispatcher\EventDispatcher;

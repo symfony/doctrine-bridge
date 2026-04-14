@@ -149,3 +149,5 @@ final class UlidTypeTest extends TestCase
         $this->assertTrue($this->type->requiresSQLCommentHint(new SQLitePlatform()));
     }
 }
+
+// @php-cs-fixer-ignore fully_qualified_strict_types

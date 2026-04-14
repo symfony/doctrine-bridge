@@ -85,3 +85,5 @@ final class DatePointTypeTest extends TestCase
         $this->assertSame('date_point', $this->type->getName());
     }
 }
+
+// @php-cs-fixer-ignore fully_qualified_strict_types

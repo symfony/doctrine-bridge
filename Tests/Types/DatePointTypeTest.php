@@ -100,3 +100,5 @@ final class DatePointTypeTest extends TestCase
         return new \Doctrine\DBAL\Platforms\SqlitePlatform();
     }
 }
+
+// @php-cs-fixer-ignore fully_qualified_strict_types

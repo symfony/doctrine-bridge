@@ -12,7 +12,7 @@
 namespace Symfony\Bridge\Doctrine\SchemaListener;
 
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Exception\ConnectionException;
+use Doctrine\DBAL\Driver\Exception as DBALDriverException;
 use Doctrine\DBAL\Exception\DatabaseObjectExistsException;
 use Doctrine\DBAL\Exception\DatabaseObjectNotFoundException;
 use Doctrine\DBAL\Schema\Name\Identifier;
@@ -85,7 +85,7 @@ abstract class AbstractSchemaListener
 
             try {
                 $exec(\sprintf('DELETE FROM schema_subscriber_check_ WHERE random_key = %s', $connection->getDatabasePlatform()->quoteStringLiteral($key)));
-            } catch (DatabaseObjectNotFoundException|ConnectionException|\PDOException) {
+            } catch (DBALDriverException|\PDOException) {
             }
 
             try {

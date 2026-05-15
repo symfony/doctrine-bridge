@@ -152,6 +152,55 @@ class DoctrinePingConnectionMiddlewareTest extends MiddlewareTestCase
         $middleware->handle($envelope, $this->getStackMock());
     }
 
+    public function testMiddlewarePingsHealthyManagersWhenOneFailsInMultiEntityManagerMode()
+    {
+        $healthy = $this->connectionExpectingOnePing();
+
+        $failing = $this->createMock(Connection::class);
+        $failing->method('isConnected')->willReturn(true);
+        $failing->method('getDatabasePlatform')->willReturn($this->mockPlatform());
+        $failing->expects($this->exactly(2))
+            ->method('executeQuery')
+            ->willThrowException($this->createStub(DBALException::class));
+        $failing->expects($this->once())->method('close');
+
+        $registry = $this->createRegistryForManagers([
+            'broken' => $this->createManagerWithConnection($failing),
+            'healthy' => $this->createManagerWithConnection($healthy),
+        ]);
+
+        $middleware = new DoctrinePingConnectionMiddleware($registry);
+
+        $envelope = new Envelope(new \stdClass(), [
+            new ConsumedByWorkerStamp(),
+        ]);
+
+        $this->expectException(DBALException::class);
+
+        $middleware->handle($envelope, $this->getStackMock(false));
+    }
+
+    public function testMiddlewareSkipsPingWhenConnectionIsNotConnected()
+    {
+        $connection = $this->createMock(Connection::class);
+        $connection->method('isConnected')->willReturn(false);
+        $connection->expects($this->never())->method('executeQuery');
+        $connection->expects($this->never())->method('close');
+
+        $manager = $this->createStub(EntityManagerInterface::class);
+        $manager->method('getConnection')->willReturn($connection);
+
+        $registry = $this->createStub(ManagerRegistry::class);
+        $registry->method('getManager')->willReturn($manager);
+
+        $middleware = new DoctrinePingConnectionMiddleware($registry, $this->entityManagerName);
+
+        $envelope = new Envelope(new \stdClass(), [
+            new ConsumedByWorkerStamp(),
+        ]);
+        $middleware->handle($envelope, $this->getStackMock());
+    }
+
     public function testMiddlewareResetsClosedManagersWhenEntityManagerNameIsNull()
     {
         $registry = $this->createRegistryForManagers([

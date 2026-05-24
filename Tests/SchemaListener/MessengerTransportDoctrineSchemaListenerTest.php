@@ -16,11 +16,15 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\Event\GenerateSchemaEventArgs;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bridge\Doctrine\SchemaListener\MessengerTransportDoctrineSchemaListener;
 use Symfony\Component\Messenger\Bridge\Doctrine\Transport\DoctrineTransport;
 use Symfony\Component\Messenger\Transport\TransportInterface;
 
+#[IgnoreDeprecations]
+#[Group('doctrine-dbal-workaround')]
 class MessengerTransportDoctrineSchemaListenerTest extends TestCase
 {
     public function testPostGenerateSchema()

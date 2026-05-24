@@ -16,6 +16,8 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\Event\GenerateSchemaEventArgs;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bridge\Doctrine\SchemaListener\PdoSessionHandlerSchemaListener;
@@ -44,6 +46,8 @@ class PdoSessionHandlerSchemaListenerTest extends TestCase
         $subscriber->postGenerateSchema($event);
     }
 
+    #[IgnoreDeprecations]
+    #[Group('doctrine-dbal-workaround')]
     public function testPostGenerateSchemaRespectsSchemaFilter()
     {
         $schema = new Schema();

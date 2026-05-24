@@ -18,6 +18,8 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Tools\SchemaTool;
 use Doctrine\Persistence\ManagerRegistry;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use Symfony\Bridge\Doctrine\Form\DoctrineOrmExtension;
 use Symfony\Bridge\Doctrine\Form\DoctrineOrmTypeGuesser;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -48,6 +50,8 @@ use Symfony\Component\OptionsResolver\Exception\MissingOptionsException;
 use Symfony\Component\Uid\Ulid;
 use Symfony\Component\Uid\Uuid;
 
+#[IgnoreDeprecations]
+#[Group('doctrine-dbal-workaround')]
 class EntityTypeTest extends BaseTypeTestCase
 {
     public const TESTED_TYPE = EntityType::class;

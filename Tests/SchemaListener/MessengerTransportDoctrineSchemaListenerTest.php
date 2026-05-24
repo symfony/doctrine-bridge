@@ -19,6 +19,8 @@ use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\Event\GenerateSchemaEventArgs;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bridge\Doctrine\SchemaListener\MessengerTransportDoctrineSchemaListener;
 use Symfony\Component\Messenger\Bridge\Doctrine\Transport\DoctrineTransport;
@@ -109,6 +111,8 @@ class MessengerTransportDoctrineSchemaListenerTest extends TestCase
         $this->assertFalse($event->isDefaultPrevented());
     }
 
+    #[IgnoreDeprecations]
+    #[Group('doctrine-dbal-workaround')]
     public function testPostGenerateSchemaRespectsSchemaFilter()
     {
         $schema = new Schema();
@@ -136,6 +140,8 @@ class MessengerTransportDoctrineSchemaListenerTest extends TestCase
         $this->assertFalse($schema->hasTable('messenger_messages'));
     }
 
+    #[IgnoreDeprecations]
+    #[Group('doctrine-dbal-workaround')]
     public function testPostGenerateSchemaRespectsSchemaFilterIncludingSequences()
     {
         $schema = new Schema();
@@ -166,6 +172,8 @@ class MessengerTransportDoctrineSchemaListenerTest extends TestCase
         $this->assertFalse($schema->hasSequence('messenger_messages_seq'));
     }
 
+    #[IgnoreDeprecations]
+    #[Group('doctrine-dbal-workaround')]
     public function testPostGenerateSchemaFilterDoesNotAffectPreExistingSequences()
     {
         $schema = new Schema();

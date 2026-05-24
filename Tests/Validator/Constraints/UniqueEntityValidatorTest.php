@@ -57,6 +57,8 @@ use Symfony\Component\Validator\Test\ConstraintValidatorTestCase;
 /**
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
+#[IgnoreDeprecations]
+#[Group('doctrine-dbal-workaround')]
 class UniqueEntityValidatorTest extends ConstraintValidatorTestCase
 {
     private const EM_NAME = 'foo';

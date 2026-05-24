@@ -16,6 +16,8 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\Event\GenerateSchemaEventArgs;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bridge\Doctrine\SchemaListener\LockStoreSchemaListener;
 use Symfony\Component\Lock\Store\DoctrineDbalStore;
@@ -42,6 +44,8 @@ class LockStoreSchemaListenerTest extends TestCase
         $subscriber->postGenerateSchema($event);
     }
 
+    #[IgnoreDeprecations]
+    #[Group('doctrine-dbal-workaround')]
     public function testPostGenerateSchemaRespectsSchemaFilter()
     {
         $schema = new Schema();

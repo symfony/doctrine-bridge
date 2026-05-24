@@ -16,6 +16,8 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\Event\GenerateSchemaEventArgs;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bridge\Doctrine\SchemaListener\RememberMeTokenProviderDoctrineSchemaListener;
 use Symfony\Bridge\Doctrine\Security\RememberMe\DoctrineTokenProvider;
@@ -32,6 +34,8 @@ class RememberMeTokenProviderDoctrineSchemaListenerTest extends TestCase
         }
     }
 
+    #[IgnoreDeprecations]
+    #[Group('doctrine-dbal-workaround')]
     public function testPostGenerateSchema()
     {
         $schema = new Schema();
@@ -57,6 +61,8 @@ class RememberMeTokenProviderDoctrineSchemaListenerTest extends TestCase
         $this->assertTrue($schema->hasTable('rememberme_token'));
     }
 
+    #[IgnoreDeprecations]
+    #[Group('doctrine-dbal-workaround')]
     public function testPostGenerateSchemaRespectsSchemaFilter()
     {
         $schema = new Schema();

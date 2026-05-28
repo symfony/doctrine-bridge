@@ -36,9 +36,11 @@ final class LockStoreSchemaListener extends AbstractSchemaListener
             }
 
             $isSameDatabaseChecker = $this->getIsSameDatabaseChecker($connection);
-            $this->filterSchemaChanges($schema, $connection, static function () use ($store, $schema, $isSameDatabaseChecker) {
-                $store->configureSchema($schema, $isSameDatabaseChecker);
-            });
+            $schema = $this->filterSchemaChanges($schema, $connection, static fn () => $store->configureSchema($schema, $isSameDatabaseChecker)) ?? $schema;
+        }
+
+        if (method_exists($event, 'setSchema')) {
+            $event->setSchema($schema);
         }
     }
 }

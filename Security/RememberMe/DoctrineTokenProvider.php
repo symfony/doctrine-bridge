@@ -17,6 +17,7 @@ use Doctrine\DBAL\Schema\Name\Identifier;
 use Doctrine\DBAL\Schema\Name\UnqualifiedName;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
 use Symfony\Component\Security\Core\Authentication\RememberMe\PersistentToken;
 use Symfony\Component\Security\Core\Authentication\RememberMe\PersistentTokenInterface;
@@ -188,23 +189,38 @@ final class DoctrineTokenProvider implements TokenProviderInterface, TokenVerifi
 
     /**
      * Adds the Table to the Schema if "remember me" uses this Connection.
+     *
+     * @return Schema The (possibly new) schema with the table added
      */
-    public function configureSchema(Schema $schema, Connection $forConnection, \Closure $isSameDatabase): void
+    public function configureSchema(Schema $schema, Connection $forConnection, \Closure $isSameDatabase)
     {
         if ($schema->hasTable('rememberme_token')) {
-            return;
+            return $schema;
         }
 
         if ($forConnection !== $this->conn && !$isSameDatabase($this->conn->executeStatement(...))) {
-            return;
+            return $schema;
         }
 
-        $this->addTableToSchema($schema);
+        return $this->addTableToSchema($schema);
     }
 
-    private function addTableToSchema(Schema $schema): void
+    private function addTableToSchema(Schema $schema): Schema
     {
-        $table = $schema->createTable('rememberme_token');
+        if (method_exists($schema, 'edit')) {
+            $table = new Table('rememberme_token');
+            $this->configureSchemaTable($table);
+
+            return $schema->edit()->addTable($table)->create();
+        }
+
+        $this->configureSchemaTable($schema->createTable('rememberme_token'));
+
+        return $schema;
+    }
+
+    private function configureSchemaTable(Table $table): void
+    {
         $table->addColumn('series', Types::STRING, ['length' => 88]);
         $table->addColumn('value', Types::STRING, ['length' => 88]);
         $table->addColumn('lastUsed', Types::DATETIME_IMMUTABLE);

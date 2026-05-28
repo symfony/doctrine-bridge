@@ -35,9 +35,11 @@ class DoctrineDbalCacheAdapterSchemaListener extends AbstractSchemaListener
 
         foreach ($this->dbalAdapters as $dbalAdapter) {
             $isSameDatabaseChecker = $this->getIsSameDatabaseChecker($connection);
-            $this->filterSchemaChanges($schema, $connection, static function () use ($dbalAdapter, $schema, $connection, $isSameDatabaseChecker) {
-                $dbalAdapter->configureSchema($schema, $connection, $isSameDatabaseChecker);
-            });
+            $schema = $this->filterSchemaChanges($schema, $connection, static fn () => $dbalAdapter->configureSchema($schema, $connection, $isSameDatabaseChecker));
+        }
+
+        if (method_exists($event, 'setSchema')) {
+            $event->setSchema($schema);
         }
     }
 }

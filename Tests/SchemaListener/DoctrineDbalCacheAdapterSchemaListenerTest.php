@@ -14,10 +14,9 @@ namespace Symfony\Bridge\Doctrine\Tests\SchemaListener;
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\Table;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\Event\GenerateSchemaEventArgs;
-use PHPUnit\Framework\Attributes\Group;
-use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bridge\Doctrine\SchemaListener\DoctrineDbalCacheAdapterSchemaListener;
 use Symfony\Component\Cache\Adapter\DoctrineDbalAdapter;
@@ -45,8 +44,6 @@ class DoctrineDbalCacheAdapterSchemaListenerTest extends TestCase
         $subscriber->postGenerateSchema($event);
     }
 
-    #[IgnoreDeprecations]
-    #[Group('doctrine-dbal-workaround')]
     public function testPostGenerateSchemaRespectsSchemaFilter()
     {
         $schema = new Schema();
@@ -64,13 +61,22 @@ class DoctrineDbalCacheAdapterSchemaListenerTest extends TestCase
         $dbalAdapter = $this->createStub(DoctrineDbalAdapter::class);
         $dbalAdapter->method('configureSchema')
             ->willReturnCallback(static function (Schema $schema) {
+                if (method_exists($schema, 'edit')) {
+                    $table = new Table('cache_items');
+                    $table->addColumn('item_id', 'string');
+
+                    return $schema->edit()->addTable($table)->create();
+                }
+
                 $table = $schema->createTable('cache_items');
                 $table->addColumn('item_id', 'string');
+
+                return $schema;
             });
 
         $listener = new DoctrineDbalCacheAdapterSchemaListener([$dbalAdapter]);
         $listener->postGenerateSchema($event);
 
-        $this->assertFalse($schema->hasTable('cache_items'));
+        $this->assertFalse($event->getSchema()->hasTable('cache_items'));
     }
 }

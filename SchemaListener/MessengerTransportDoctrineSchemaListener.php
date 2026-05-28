@@ -42,9 +42,11 @@ class MessengerTransportDoctrineSchemaListener extends AbstractSchemaListener
             }
 
             $isSameDatabaseChecker = $this->getIsSameDatabaseChecker($connection);
-            $this->filterSchemaChanges($schema, $connection, static function () use ($transport, $schema, $connection, $isSameDatabaseChecker) {
-                $transport->configureSchema($schema, $connection, $isSameDatabaseChecker);
-            });
+            $schema = $this->filterSchemaChanges($schema, $connection, static fn () => $transport->configureSchema($schema, $connection, $isSameDatabaseChecker)) ?? $schema;
+        }
+
+        if (method_exists($event, 'setSchema')) {
+            $event->setSchema($schema);
         }
     }
 

@@ -14,10 +14,9 @@ namespace Symfony\Bridge\Doctrine\Tests\SchemaListener;
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\Table;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\Event\GenerateSchemaEventArgs;
-use PHPUnit\Framework\Attributes\Group;
-use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bridge\Doctrine\SchemaListener\PdoSessionHandlerSchemaListener;
@@ -46,8 +45,6 @@ class PdoSessionHandlerSchemaListenerTest extends TestCase
         $subscriber->postGenerateSchema($event);
     }
 
-    #[IgnoreDeprecations]
-    #[Group('doctrine-dbal-workaround')]
     public function testPostGenerateSchemaRespectsSchemaFilter()
     {
         $schema = new Schema();
@@ -65,14 +62,22 @@ class PdoSessionHandlerSchemaListenerTest extends TestCase
         $pdoSessionHandler = $this->createStub(PdoSessionHandler::class);
         $pdoSessionHandler->method('configureSchema')
             ->willReturnCallback(static function (Schema $schema) {
-                $table = $schema->createTable('sessions');
-                $table->addColumn('sess_id', 'string');
+                if (method_exists($schema, 'edit')) {
+                    $table = new Table('sessions');
+                    $table->addColumn('sess_id', 'string');
+
+                    return $schema->edit()->addTable($table)->create();
+                }
+
+                $schema->createTable('sessions')->addColumn('sess_id', 'string');
+
+                return $schema;
             });
 
         $listener = new PdoSessionHandlerSchemaListener($pdoSessionHandler);
         $listener->postGenerateSchema($event);
 
-        $this->assertFalse($schema->hasTable('sessions'));
+        $this->assertFalse($event->getSchema()->hasTable('sessions'));
     }
 
     #[RequiresPhpExtension('pdo_sqlite')]

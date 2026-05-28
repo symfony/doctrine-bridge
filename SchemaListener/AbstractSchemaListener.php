@@ -30,10 +30,8 @@ abstract class AbstractSchemaListener
 
     /**
      * @param callable(): Schema $configurator returns the (possibly new) schema with the table added
-     *
-     * @return Schema The (possibly new) schema after filtering
      */
-    protected function filterSchemaChanges(Schema $schema, Connection $connection, callable $configurator)
+    protected function filterSchemaChanges(Schema $schema, Connection $connection, callable $configurator): Schema
     {
         $filter = $connection->getConfiguration()->getSchemaAssetsFilter();
         $getName = static fn ($object) => $object instanceof NamedObject ? $object->getObjectName()->toString() : $object->getName();
@@ -43,7 +41,7 @@ abstract class AbstractSchemaListener
             $previousSequenceNames = array_map($getName, $schema->getSequences());
         }
 
-        $newSchema = $configurator() ?? $schema;
+        $newSchema = $configurator();
 
         if (null !== $filter) {
             $tablesToFilter = [];

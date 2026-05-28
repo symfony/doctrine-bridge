@@ -189,10 +189,8 @@ final class DoctrineTokenProvider implements TokenProviderInterface, TokenVerifi
 
     /**
      * Adds the Table to the Schema if "remember me" uses this Connection.
-     *
-     * @return Schema The (possibly new) schema with the table added
      */
-    public function configureSchema(Schema $schema, Connection $forConnection, \Closure $isSameDatabase)
+    public function configureSchema(Schema $schema, Connection $forConnection, \Closure $isSameDatabase): Schema
     {
         if ($schema->hasTable('rememberme_token')) {
             return $schema;

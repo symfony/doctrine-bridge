@@ -23,8 +23,6 @@ use Symfony\Bridge\Doctrine\SchemaListener\MessengerTransportDoctrineSchemaListe
 use Symfony\Component\Messenger\Bridge\Doctrine\Transport\DoctrineTransport;
 use Symfony\Component\Messenger\Transport\TransportInterface;
 
-#[IgnoreDeprecations]
-#[Group('doctrine-dbal-workaround')]
 class MessengerTransportDoctrineSchemaListenerTest extends TestCase
 {
     public function testPostGenerateSchema()

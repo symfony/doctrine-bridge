@@ -43,7 +43,7 @@ abstract class AbstractSchemaListener
             $previousSequenceNames = array_map($getName, $schema->getSequences());
         }
 
-        $newSchema = $configurator();
+        $newSchema = $configurator() ?? $schema;
 
         if (null !== $filter) {
             $tablesToFilter = [];

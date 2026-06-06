@@ -73,18 +73,19 @@ class DoctrineChoiceLoaderTest extends TestCase
         );
 
         $choices = [$this->obj1, $this->obj2, $this->obj3];
-        $value = static function () {};
-        $choiceList = new ArrayChoiceList($choices, $value);
+        $value = static fn ($choice) => $choice->name;
 
         $this->repository->expects($this->once())
             ->method('findAll')
             ->willReturn($choices);
 
-        $this->assertEquals($choiceList, $loader->loadChoiceList($value));
+        $expected = ['A' => $this->obj1, 'B' => $this->obj2, 'C' => $this->obj3];
+
+        $this->assertSame($expected, $loader->loadChoiceList($value)->getChoices());
 
         // no further loads on subsequent calls
 
-        $this->assertEquals($choiceList, $loader->loadChoiceList($value));
+        $this->assertSame($expected, $loader->loadChoiceList($value)->getChoices());
     }
 
     public function testLoadChoiceListUsesObjectLoaderIfAvailable()

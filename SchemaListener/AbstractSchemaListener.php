@@ -15,6 +15,7 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver\Exception as DBALDriverException;
 use Doctrine\DBAL\Exception\DatabaseObjectExistsException;
 use Doctrine\DBAL\Exception\DatabaseObjectNotFoundException;
+use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\Name\Identifier;
 use Doctrine\DBAL\Schema\Name\UnqualifiedName;
 use Doctrine\DBAL\Schema\NamedObject;
@@ -122,14 +123,25 @@ abstract class AbstractSchemaListener
         return static function (\Closure $exec) use ($connection): bool {
             $schemaManager = method_exists($connection, 'createSchemaManager') ? $connection->createSchemaManager() : $connection->getSchemaManager();
             $key = bin2hex(random_bytes(7));
-            $table = new Table('schema_subscriber_check_');
-            $table->addColumn('id', Types::INTEGER, ['autoincrement' => true, 'notnull' => true]);
-            $table->addColumn('random_key', Types::STRING, ['length' => 14, 'notnull' => true]);
 
-            if (class_exists(PrimaryKeyConstraint::class)) {
-                $table->addPrimaryKeyConstraint(new PrimaryKeyConstraint(null, [new UnqualifiedName(Identifier::unquoted('id'))], true));
+            if (method_exists(Table::class, 'editor')) {
+                $table = Table::editor()
+                    ->setUnquotedName('schema_subscriber_check_')
+                    ->addColumn(Column::editor()->setUnquotedName('id')->setTypeName(Types::INTEGER)->setAutoincrement(true)->setNotNull(true)->create())
+                    ->addColumn(Column::editor()->setUnquotedName('random_key')->setTypeName(Types::STRING)->setLength(14)->setNotNull(true)->create())
+                    ->addPrimaryKeyConstraint(new PrimaryKeyConstraint(null, [new UnqualifiedName(Identifier::unquoted('id'))], true))
+                    ->create();
             } else {
-                $table->setPrimaryKey(['id']);
+                // To be removed when doctrine/dbal minimum is bumped to ^4.4
+                $table = new Table('schema_subscriber_check_');
+                $table->addColumn('id', Types::INTEGER, ['autoincrement' => true, 'notnull' => true]);
+                $table->addColumn('random_key', Types::STRING, ['length' => 14, 'notnull' => true]);
+
+                if (class_exists(PrimaryKeyConstraint::class)) {
+                    $table->addPrimaryKeyConstraint(new PrimaryKeyConstraint(null, [new UnqualifiedName(Identifier::unquoted('id'))], true));
+                } else {
+                    $table->setPrimaryKey(['id']);
+                }
             }
 
             try {

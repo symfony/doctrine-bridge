@@ -13,6 +13,7 @@ namespace Symfony\Bridge\Doctrine\Tests\SchemaListener;
 
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Schema\Sequence;
 use Doctrine\DBAL\Schema\Table;
@@ -133,10 +134,7 @@ class MessengerTransportDoctrineSchemaListenerTest extends TestCase
     private static function addMessengerMessages(Schema $schema): Schema
     {
         if (method_exists($schema, 'edit')) {
-            $table = new Table('messenger_messages');
-            $table->addColumn('id', 'integer', ['autoincrement' => true]);
-
-            return $schema->edit()->addTable($table)->create();
+            return $schema->edit()->addTable(self::buildMessengerMessagesTable())->create();
         }
 
         $schema->createTable('messenger_messages')->addColumn('id', 'integer', ['autoincrement' => true]);
@@ -147,15 +145,20 @@ class MessengerTransportDoctrineSchemaListenerTest extends TestCase
     private static function addMessengerMessagesWithSequence(Schema $schema): Schema
     {
         if (method_exists($schema, 'edit')) {
-            $table = new Table('messenger_messages');
-            $table->addColumn('id', 'integer', ['autoincrement' => true]);
-
-            return $schema->edit()->addTable($table)->addSequence(new Sequence('messenger_messages_seq'))->create();
+            return $schema->edit()->addTable(self::buildMessengerMessagesTable())->addSequence(new Sequence('messenger_messages_seq'))->create();
         }
 
         $schema->createTable('messenger_messages')->addColumn('id', 'integer', ['autoincrement' => true]);
         $schema->createSequence('messenger_messages_seq');
 
         return $schema;
+    }
+
+    private static function buildMessengerMessagesTable(): Table
+    {
+        return Table::editor()
+            ->setUnquotedName('messenger_messages')
+            ->addColumn(Column::editor()->setUnquotedName('id')->setTypeName('integer')->setAutoincrement(true)->create())
+            ->create();
     }
 }

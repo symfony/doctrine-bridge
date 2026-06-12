@@ -13,6 +13,7 @@ namespace Symfony\Bridge\Doctrine\Tests\SchemaListener;
 
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\ORM\EntityManagerInterface;
@@ -63,8 +64,10 @@ class PdoSessionHandlerSchemaListenerTest extends TestCase
         $pdoSessionHandler->method('configureSchema')
             ->willReturnCallback(static function (Schema $schema) {
                 if (method_exists($schema, 'edit')) {
-                    $table = new Table('sessions');
-                    $table->addColumn('sess_id', 'string');
+                    $table = Table::editor()
+                        ->setUnquotedName('sessions')
+                        ->addColumn(Column::editor()->setUnquotedName('sess_id')->setTypeName('string')->create())
+                        ->create();
 
                     return $schema->edit()->addTable($table)->create();
                 }

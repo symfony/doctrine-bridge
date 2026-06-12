@@ -13,6 +13,7 @@ namespace Symfony\Bridge\Doctrine\Tests\SchemaListener;
 
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\ORM\EntityManagerInterface;
@@ -61,8 +62,10 @@ class LockStoreSchemaListenerTest extends TestCase
         $lockStore->method('configureSchema')
             ->willReturnCallback(static function (Schema $schema) {
                 if (method_exists($schema, 'edit')) {
-                    $table = new Table('lock_keys');
-                    $table->addColumn('key_id', 'string');
+                    $table = Table::editor()
+                        ->setUnquotedName('lock_keys')
+                        ->addColumn(Column::editor()->setUnquotedName('key_id')->setTypeName('string')->create())
+                        ->create();
 
                     return $schema->edit()->addTable($table)->create();
                 }

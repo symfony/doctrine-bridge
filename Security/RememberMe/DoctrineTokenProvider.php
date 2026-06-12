@@ -13,6 +13,7 @@ namespace Symfony\Bridge\Doctrine\Security\RememberMe;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\ParameterType;
+use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\Name\Identifier;
 use Doctrine\DBAL\Schema\Name\UnqualifiedName;
 use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
@@ -206,10 +207,7 @@ final class DoctrineTokenProvider implements TokenProviderInterface, TokenVerifi
     private function addTableToSchema(Schema $schema): Schema
     {
         if (method_exists($schema, 'edit')) {
-            $table = new Table('rememberme_token');
-            $this->configureSchemaTable($table);
-
-            return $schema->edit()->addTable($table)->create();
+            return $schema->edit()->addTable($this->buildSchemaTable())->create();
         }
 
         $this->configureSchemaTable($schema->createTable('rememberme_token'));
@@ -217,6 +215,22 @@ final class DoctrineTokenProvider implements TokenProviderInterface, TokenVerifi
         return $schema;
     }
 
+    private function buildSchemaTable(): Table
+    {
+        return Table::editor()
+            ->setUnquotedName('rememberme_token')
+            ->addColumn(Column::editor()->setUnquotedName('series')->setTypeName(Types::STRING)->setLength(88)->create())
+            ->addColumn(Column::editor()->setUnquotedName('value')->setTypeName(Types::STRING)->setLength(88)->create())
+            ->addColumn(Column::editor()->setUnquotedName('lastUsed')->setTypeName(Types::DATETIME_IMMUTABLE)->create())
+            ->addColumn(Column::editor()->setUnquotedName('class')->setTypeName(Types::STRING)->setLength(100)->setDefaultValue('')->create())
+            ->addColumn(Column::editor()->setUnquotedName('username')->setTypeName(Types::STRING)->setLength(200)->create())
+            ->addPrimaryKeyConstraint(new PrimaryKeyConstraint(null, [new UnqualifiedName(Identifier::unquoted('series'))], true))
+            ->create();
+    }
+
+    /**
+     * To be removed when doctrine/dbal minimum is bumped to ^4.5.
+     */
     private function configureSchemaTable(Table $table): void
     {
         $table->addColumn('series', Types::STRING, ['length' => 88]);

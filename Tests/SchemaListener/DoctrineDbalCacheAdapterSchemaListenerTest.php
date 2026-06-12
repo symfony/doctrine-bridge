@@ -13,6 +13,7 @@ namespace Symfony\Bridge\Doctrine\Tests\SchemaListener;
 
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\ORM\EntityManagerInterface;
@@ -62,8 +63,10 @@ class DoctrineDbalCacheAdapterSchemaListenerTest extends TestCase
         $dbalAdapter->method('configureSchema')
             ->willReturnCallback(static function (Schema $schema) {
                 if (method_exists($schema, 'edit')) {
-                    $table = new Table('cache_items');
-                    $table->addColumn('item_id', 'string');
+                    $table = Table::editor()
+                        ->setUnquotedName('cache_items')
+                        ->addColumn(Column::editor()->setUnquotedName('item_id')->setTypeName('string')->create())
+                        ->create();
 
                     return $schema->edit()->addTable($table)->create();
                 }

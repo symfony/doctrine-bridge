@@ -54,7 +54,7 @@ class RememberMeTokenProviderDoctrineSchemaListenerTest extends TestCase
         $listener = new RememberMeTokenProviderDoctrineSchemaListener([$rememberMeHandler]);
         $listener->postGenerateSchema($event);
 
-        $this->assertTrue($schema->hasTable('rememberme_token'));
+        $this->assertTrue($event->getSchema()->hasTable('rememberme_token'));
     }
 
     public function testPostGenerateSchemaRespectsSchemaFilter()
@@ -82,6 +82,6 @@ class RememberMeTokenProviderDoctrineSchemaListenerTest extends TestCase
         $listener = new RememberMeTokenProviderDoctrineSchemaListener([$rememberMeHandler]);
         $listener->postGenerateSchema($event);
 
-        $this->assertFalse($schema->hasTable('rememberme_token'));
+        $this->assertFalse($event->getSchema()->hasTable('rememberme_token'));
     }
 }

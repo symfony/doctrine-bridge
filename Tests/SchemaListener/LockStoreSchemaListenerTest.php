@@ -13,7 +13,9 @@ namespace Symfony\Bridge\Doctrine\Tests\SchemaListener;
 
 use Doctrine\DBAL\Configuration;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\Table;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\Event\GenerateSchemaEventArgs;
 use PHPUnit\Framework\TestCase;
@@ -36,7 +38,7 @@ class LockStoreSchemaListenerTest extends TestCase
         $lockStore = $this->createMock(DoctrineDbalStore::class);
         $lockStore->expects($this->once())
             ->method('configureSchema')
-            ->with($schema, static fn () => true);
+            ->with($schema, $this->callback(static fn () => true));
 
         $subscriber = new LockStoreSchemaListener((static fn () => yield $lockStore)());
         $subscriber->postGenerateSchema($event);
@@ -59,13 +61,23 @@ class LockStoreSchemaListenerTest extends TestCase
         $lockStore = $this->createStub(DoctrineDbalStore::class);
         $lockStore->method('configureSchema')
             ->willReturnCallback(static function (Schema $schema) {
-                $table = $schema->createTable('lock_keys');
-                $table->addColumn('key_id', 'string');
+                if (method_exists($schema, 'edit')) {
+                    $table = Table::editor()
+                        ->setUnquotedName('lock_keys')
+                        ->addColumn(Column::editor()->setUnquotedName('key_id')->setTypeName('string')->create())
+                        ->create();
+
+                    return $schema->edit()->addTable($table)->create();
+                }
+
+                $schema->createTable('lock_keys')->addColumn('key_id', 'string');
+
+                return $schema;
             });
 
         $listener = new LockStoreSchemaListener([$lockStore]);
         $listener->postGenerateSchema($event);
 
-        $this->assertFalse($schema->hasTable('lock_keys'));
+        $this->assertFalse($event->getSchema()->hasTable('lock_keys'));
     }
 }

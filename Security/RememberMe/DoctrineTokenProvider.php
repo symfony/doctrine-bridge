@@ -15,7 +15,12 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver\Result as DriverResult;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Result;
+use Doctrine\DBAL\Schema\Column;
+use Doctrine\DBAL\Schema\Name\Identifier;
+use Doctrine\DBAL\Schema\Name\UnqualifiedName;
+use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
 use Symfony\Component\Security\Core\Authentication\RememberMe\PersistentToken;
 use Symfony\Component\Security\Core\Authentication\RememberMe\PersistentTokenInterface;
@@ -188,30 +193,63 @@ class DoctrineTokenProvider implements TokenProviderInterface, TokenVerifierInte
      * Adds the Table to the Schema if "remember me" uses this Connection.
      *
      * @param \Closure $isSameDatabase
+     *
+     * @return Schema The (possibly new) schema with the table added
      */
-    public function configureSchema(Schema $schema, Connection $forConnection/* , \Closure $isSameDatabase */): void
+    public function configureSchema(Schema $schema, Connection $forConnection/* , \Closure $isSameDatabase */)
     {
         if ($schema->hasTable('rememberme_token')) {
-            return;
+            return $schema;
         }
 
         $isSameDatabase = 2 < \func_num_args() ? func_get_arg(2) : static fn () => false;
 
         if ($forConnection !== $this->conn && !$isSameDatabase($this->conn->executeStatement(...))) {
-            return;
+            return $schema;
         }
 
-        $this->addTableToSchema($schema);
+        return $this->addTableToSchema($schema);
     }
 
-    private function addTableToSchema(Schema $schema): void
+    private function addTableToSchema(Schema $schema): Schema
     {
-        $table = $schema->createTable('rememberme_token');
+        if (method_exists($schema, 'edit')) {
+            return $schema->edit()->addTable($this->buildSchemaTable())->create();
+        }
+
+        $this->configureSchemaTable($schema->createTable('rememberme_token'));
+
+        return $schema;
+    }
+
+    private function buildSchemaTable(): Table
+    {
+        return Table::editor()
+            ->setUnquotedName('rememberme_token')
+            ->addColumn(Column::editor()->setUnquotedName('series')->setTypeName(Types::STRING)->setLength(88)->create())
+            ->addColumn(Column::editor()->setUnquotedName('value')->setTypeName(Types::STRING)->setLength(88)->create())
+            ->addColumn(Column::editor()->setUnquotedName('lastUsed')->setTypeName(Types::DATETIME_IMMUTABLE)->create())
+            ->addColumn(Column::editor()->setUnquotedName('class')->setTypeName(Types::STRING)->setLength(100)->setDefaultValue('')->create())
+            ->addColumn(Column::editor()->setUnquotedName('username')->setTypeName(Types::STRING)->setLength(200)->create())
+            ->addPrimaryKeyConstraint(new PrimaryKeyConstraint(null, [new UnqualifiedName(Identifier::unquoted('series'))], true))
+            ->create();
+    }
+
+    /**
+     * To be removed when doctrine/dbal minimum is bumped to ^4.5.
+     */
+    private function configureSchemaTable(Table $table): void
+    {
         $table->addColumn('series', Types::STRING, ['length' => 88]);
         $table->addColumn('value', Types::STRING, ['length' => 88]);
         $table->addColumn('lastUsed', Types::DATETIME_IMMUTABLE);
-        $table->addColumn('class', Types::STRING, ['length' => 100]);
+        $table->addColumn('class', Types::STRING, ['length' => 100, 'default' => '']);
         $table->addColumn('username', Types::STRING, ['length' => 200]);
-        $table->setPrimaryKey(['series']);
+
+        if (class_exists(PrimaryKeyConstraint::class)) {
+            $table->addPrimaryKeyConstraint(new PrimaryKeyConstraint(null, [new UnqualifiedName(Identifier::unquoted('series'))], true));
+        } else {
+            $table->setPrimaryKey(['series']);
+        }
     }
 }

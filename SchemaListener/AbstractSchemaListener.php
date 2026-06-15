@@ -12,8 +12,14 @@
 namespace Symfony\Bridge\Doctrine\SchemaListener;
 
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Driver\Exception as DBALDriverException;
+use Doctrine\DBAL\Exception\DatabaseObjectExistsException;
 use Doctrine\DBAL\Exception\DatabaseObjectNotFoundException;
+use Doctrine\DBAL\Schema\Column;
+use Doctrine\DBAL\Schema\Name\Identifier;
+use Doctrine\DBAL\Schema\Name\UnqualifiedName;
 use Doctrine\DBAL\Schema\NamedObject;
+use Doctrine\DBAL\Schema\PrimaryKeyConstraint;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
@@ -23,60 +29,145 @@ abstract class AbstractSchemaListener
 {
     abstract public function postGenerateSchema(GenerateSchemaEventArgs $event): void;
 
-    protected function filterSchemaChanges(Schema $schema, Connection $connection, callable $configurator): void
+    /**
+     * @param callable(): Schema $configurator returns the (possibly new) schema with the table added
+     *
+     * @return Schema The (possibly new) schema after filtering
+     */
+    protected function filterSchemaChanges(Schema $schema, Connection $connection, callable $configurator)
     {
         $filter = $connection->getConfiguration()->getSchemaAssetsFilter();
+        $getName = static fn ($object) => $object instanceof NamedObject ? $object->getObjectName()->toString() : $object->getName();
 
-        if (null === $filter) {
-            $configurator();
-
-            return;
+        if (null !== $filter) {
+            $previousTableNames = array_map($getName, $schema->getTables());
+            $previousSequenceNames = array_map($getName, $schema->getSequences());
         }
 
-        $getNames = static fn ($array) => array_map(static fn ($object) => $object instanceof NamedObject ? $object->getObjectName()->toString() : $object->getName(), $array);
-        $previousTableNames = $getNames($schema->getTables());
-        $previousSequenceNames = $getNames($schema->getSequences());
+        $newSchema = $configurator() ?? $schema;
 
-        $configurator();
+        if (null !== $filter) {
+            $tablesToFilter = [];
+            foreach ($newSchema->getTables() as $table) {
+                $name = $getName($table);
+                if (!\in_array($name, $previousTableNames, true) && !$filter($name)) {
+                    $tablesToFilter[] = $table;
+                }
+            }
 
-        foreach (array_diff($getNames($schema->getTables()), $previousTableNames) as $addedTable) {
-            if (!$filter($addedTable)) {
-                $schema->dropTable($addedTable);
+            $sequencesToFilter = [];
+            foreach ($newSchema->getSequences() as $sequence) {
+                $name = $getName($sequence);
+                if (!\in_array($name, $previousSequenceNames, true) && !$filter($name)) {
+                    $sequencesToFilter[] = $sequence;
+                }
+            }
+
+            if ($tablesToFilter || $sequencesToFilter) {
+                // When doctrine/dbal minimum is bumped to ^4.5, the `else` branch
+                // (and the same fallback in every configureSchema() implementation)
+                // can be removed: Schema::edit() is then always available.
+                if (method_exists($newSchema, 'edit')) {
+                    $editor = $newSchema->edit();
+                    foreach ($tablesToFilter as $table) {
+                        $editor->dropTable($table->getObjectName());
+                    }
+                    foreach ($sequencesToFilter as $sequence) {
+                        $editor->dropSequence($sequence->getObjectName());
+                    }
+
+                    $newSchema = $editor->create();
+                } else {
+                    foreach ($tablesToFilter as $table) {
+                        $newSchema->dropTable($getName($table));
+                    }
+                    foreach ($sequencesToFilter as $sequence) {
+                        $newSchema->dropSequence($getName($sequence));
+                    }
+                }
             }
         }
 
-        foreach (array_diff($getNames($schema->getSequences()), $previousSequenceNames) as $addedSequence) {
-            if (!$filter($addedSequence)) {
-                $schema->dropSequence($addedSequence);
-            }
+        // Backfill the original $schema with new tables/sequences from $newSchema so that callers holding
+        // a reference to it (e.g. ORM's GenerateSchemaEventArgs prior to setSchema() being available) still
+        // see the changes. Goes through the protected _addTable/_addSequence to bypass the deprecated
+        // public createTable/createSequence.
+        //
+        // When doctrine/orm minimum is bumped to a version providing
+        // GenerateSchemaEventArgs::setSchema() (>= 3.6.8) and doctrine/dbal minimum is bumped
+        // to ^4.5, this whole block can be dropped and the
+        // `if (method_exists($schema, 'edit') && method_exists($event, 'setSchema'))` guards in
+        // each *SchemaListener subclass can become unconditional `$event->setSchema($schema);` calls.
+        // The Schema::edit() check is required because GenerateSchemaEventArgs::setSchema() itself
+        // relies on it and throws when running on a DBAL version that does not provide it.
+        if ($newSchema !== $schema) {
+            \Closure::bind(static function (Schema $schema) use ($newSchema, $getName): void {
+                foreach ($newSchema->getTables() as $table) {
+                    if (!$schema->hasTable($getName($table))) {
+                        $schema->_addTable($table);
+                    }
+                }
+                foreach ($newSchema->getSequences() as $sequence) {
+                    if (!$schema->hasSequence($getName($sequence))) {
+                        $schema->_addSequence($sequence);
+                    }
+                }
+            }, null, Schema::class)($schema);
         }
+
+        return $newSchema;
     }
 
+    /**
+     * @return \Closure(\Closure(string): mixed): bool
+     */
     protected function getIsSameDatabaseChecker(Connection $connection): \Closure
     {
         return static function (\Closure $exec) use ($connection): bool {
             $schemaManager = method_exists($connection, 'createSchemaManager') ? $connection->createSchemaManager() : $connection->getSchemaManager();
-            $checkTable = 'schema_subscriber_check_'.bin2hex(random_bytes(7));
-            $table = new Table($checkTable);
-            $table->addColumn('id', Types::INTEGER)
-                ->setAutoincrement(true)
-                ->setNotnull(true);
-            $table->setPrimaryKey(['id']);
+            $key = bin2hex(random_bytes(7));
 
-            $schemaManager->createTable($table);
+            if (method_exists(Table::class, 'editor')) {
+                $table = Table::editor()
+                    ->setUnquotedName('schema_subscriber_check_')
+                    ->addColumn(Column::editor()->setUnquotedName('id')->setTypeName(Types::INTEGER)->setAutoincrement(true)->setNotNull(true)->create())
+                    ->addColumn(Column::editor()->setUnquotedName('random_key')->setTypeName(Types::STRING)->setLength(14)->setNotNull(true)->create())
+                    ->addPrimaryKeyConstraint(new PrimaryKeyConstraint(null, [new UnqualifiedName(Identifier::unquoted('id'))], true))
+                    ->create();
+            } else {
+                // To be removed when doctrine/dbal minimum is bumped to ^4.4
+                $table = new Table('schema_subscriber_check_');
+                $table->addColumn('id', Types::INTEGER, ['autoincrement' => true, 'notnull' => true]);
+                $table->addColumn('random_key', Types::STRING, ['length' => 14, 'notnull' => true]);
 
-            try {
-                $exec(\sprintf('DROP TABLE %s', $checkTable));
-            } catch (\Exception) {
-                // ignore
+                if (class_exists(PrimaryKeyConstraint::class)) {
+                    $table->addPrimaryKeyConstraint(new PrimaryKeyConstraint(null, [new UnqualifiedName(Identifier::unquoted('id'))], true));
+                } else {
+                    $table->setPrimaryKey(['id']);
+                }
             }
 
             try {
-                $schemaManager->dropTable($checkTable);
+                $schemaManager->createTable($table);
+            } catch (DatabaseObjectExistsException) {
+            }
 
-                return false;
-            } catch (DatabaseObjectNotFoundException) {
-                return true;
+            $connection->executeStatement('INSERT INTO schema_subscriber_check_ (random_key) VALUES (:key)', ['key' => $key], ['key' => Types::STRING]);
+
+            try {
+                $exec(\sprintf('DELETE FROM schema_subscriber_check_ WHERE random_key = %s', $connection->getDatabasePlatform()->quoteStringLiteral($key)));
+            } catch (DBALDriverException|\PDOException) {
+            }
+
+            try {
+                return !$connection->executeStatement('DELETE FROM schema_subscriber_check_ WHERE random_key = :key', ['key' => $key], ['key' => Types::STRING]);
+            } finally {
+                if (!$connection->executeQuery('SELECT count(id) FROM schema_subscriber_check_')->fetchOne()) {
+                    try {
+                        $schemaManager->dropTable('schema_subscriber_check_');
+                    } catch (DatabaseObjectNotFoundException) {
+                    }
+                }
             }
         };
     }
